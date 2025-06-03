@@ -16,13 +16,16 @@ public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "restaurant_id", updatable = false, nullable = false)
-    private long restaurant_Id;
+    private long restaurantId;
 
     @Column(nullable = false, name = "contact_number")
-    private String contact_Number;
+    private String contactNumber;
 
     @Column(nullable = false, name = "restaurant_name")
-    private String restaurant_Name;
+    private String restaurantName;
+
+    @Column(nullable = false, name = "url_slug", unique = true)
+    private String slug;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -32,7 +35,7 @@ public class Restaurant {
     private Set<Restaurant_Address> restaurantAddress = new HashSet<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MenuItem> menuItems = new ArrayList<>();
+    private Set<MenuItem> menuItems = new HashSet<>();
 
     @OneToMany(mappedBy = "restaurant")
     private Set<Order> orders= new HashSet<>();

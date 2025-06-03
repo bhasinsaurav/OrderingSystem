@@ -31,7 +31,7 @@ public class MenuItem {
     @Column(name="menuitem_category")
     private String category;
 
-    @Column(name = "item_name", nullable = false)
+    @Column(name = "item_name", nullable = false, unique = true)
     private String itemName;
 
     @Column(name = "isAvailable")
