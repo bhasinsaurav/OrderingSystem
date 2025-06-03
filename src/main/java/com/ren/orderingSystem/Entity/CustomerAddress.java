@@ -5,13 +5,13 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "restaurant_address")
-public class Restaurant_Address {
+@Table(name = "customer_address")
+public class CustomerAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "restaurant_address_id", updatable = false, nullable = false)
-    private long restaurantAddressId;
+    @Column(name = "customer_address_id", updatable = false, nullable = false)
+    private long customerAddressId;
 
     @Column(name = "country", nullable = false)
     private String country;
@@ -32,6 +32,6 @@ public class Restaurant_Address {
     private String province;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id")
-    private Restaurant restaurant;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }

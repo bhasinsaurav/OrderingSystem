@@ -28,7 +28,7 @@ public class Customer {
     private User user;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Customer_Address> customerAddresses = new HashSet<>();
+    private Set<CustomerAddress> customerAddresses = new HashSet<>();
 
     @OneToMany(mappedBy = "customer")
     private Set<Order> orders = new HashSet<>();

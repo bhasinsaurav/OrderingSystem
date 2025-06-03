@@ -17,13 +17,17 @@ import java.util.UUID;
 @RequestMapping("/customer")
 public class MenuController {
 
-    @Autowired
-    private MenuService MenuService;
+    private final MenuService menuService;
+
+    public MenuController(MenuService menuService) {
+
+        this.menuService= menuService;
+    }
 
     @GetMapping("/getMenu/{userId}")
-    private ResponseEntity<?> getMenu(@PathVariable UUID userId){
+    public ResponseEntity<?> getMenu(@PathVariable UUID userId){
 
-        List<GetCustomerMenuItemResponse> menuItemsDtos = MenuService.showAllMenuItemsToCustomer(userId);
+        List<GetCustomerMenuItemResponse> menuItemsDtos = menuService.showAllMenuItemsToCustomer(userId);
         return new ResponseEntity<>(menuItemsDtos,HttpStatus.OK);
     }
 }

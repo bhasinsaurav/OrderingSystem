@@ -20,11 +20,15 @@ import java.util.UUID;
 @Service
 public class MenuService {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final MenuItemMapper menuItemMapper;
 
-    @Autowired
-    private MenuItemMapper menuItemMapper;
+    // Constructor for dependency injection
+    public MenuService(RestaurantRepository restaurantRepository,
+                       MenuItemMapper menuItemMapper) {
+        this.restaurantRepository = restaurantRepository;
+        this.menuItemMapper = menuItemMapper;
+    }
 
     public List<GetCustomerMenuItemResponse> showAllMenuItemsToCustomer(UUID userId){
         Restaurant restaurant = restaurantRepository.findByUser_UserId(userId).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for given id"));

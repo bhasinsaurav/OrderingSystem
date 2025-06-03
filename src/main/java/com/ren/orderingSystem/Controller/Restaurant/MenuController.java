@@ -14,11 +14,15 @@ import java.util.UUID;
 @RequestMapping("/restaurant")
 public class MenuController {
 
-    @Autowired
-    private MenuService menuService;
+    private final MenuService menuService;
+
+    public MenuController(MenuService menuService) {
+
+        this.menuService= menuService;
+    }
 
     @PostMapping("/addMenu/{userId}")
-    private ResponseEntity<?> addMenu(@RequestBody AddMenuItemRequest addMenuItemDto, @PathVariable UUID userId){
+    public ResponseEntity<?> addMenu(@RequestBody AddMenuItemRequest addMenuItemDto, @PathVariable UUID userId){
         AddMenuItemResponse addMenuItemResponse = menuService.addMenuItem(addMenuItemDto, userId);
         return new ResponseEntity<>(addMenuItemResponse, HttpStatus.CREATED);
 

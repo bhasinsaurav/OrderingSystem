@@ -3,19 +3,15 @@ package com.ren.orderingSystem.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 @Entity
 @Data
-@Table(name = "customer_address")
-public class Customer_Address {
+@Table(name = "restaurant_address")
+public class RestaurantAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "customer_address_id", updatable = false, nullable = false)
-    private long customerAddressId;
+    @Column(name = "restaurant_address_id", updatable = false, nullable = false)
+    private long restaurantAddressId;
 
     @Column(name = "country", nullable = false)
     private String country;
@@ -36,6 +32,6 @@ public class Customer_Address {
     private String province;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
 }
