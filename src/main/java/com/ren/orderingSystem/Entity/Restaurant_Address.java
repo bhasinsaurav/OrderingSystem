@@ -20,13 +20,13 @@ public class Restaurant_Address {
     private String city;
 
     @Column(name = "street_name")
-    private String street_Name;
+    private String streetName;
 
     @Column(name = "street_address")
-    private String street_Address;
+    private String streetAddress;
 
     @Column(name = "pin_code")
-    private String pin_Code;
+    private String pinCode;
 
     @Column(name = "province")
     private String province;
