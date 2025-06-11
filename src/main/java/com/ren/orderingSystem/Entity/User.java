@@ -2,6 +2,7 @@ package com.ren.orderingSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @Data
+@EqualsAndHashCode(exclude = {"restaurant" ,"customer"})
 public class User {
 
     @Id

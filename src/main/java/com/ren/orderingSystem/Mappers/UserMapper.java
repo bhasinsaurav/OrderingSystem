@@ -12,7 +12,6 @@ public class UserMapper {
         user.setLastName(newRestaurant.getLastName());
         user.setUserName(newRestaurant.getUserName());
         user.setEmail(newRestaurant.getEmail());
-        user.setPassword(newRestaurant.getPassword());
         user.setPhoneNumber(newRestaurant.getPhoneNumber());
         return user;
     }

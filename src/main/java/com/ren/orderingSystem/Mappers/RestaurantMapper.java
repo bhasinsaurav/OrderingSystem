@@ -15,6 +15,7 @@ public class RestaurantMapper {
         Restaurant restaurant = new Restaurant();
         restaurant.setContactNumber(newRestaurantDetails.getContactNumber());
         restaurant.setRestaurantName(newRestaurantDetails.getRestaurantName());
+        restaurant.setSlug(newRestaurantDetails.getSlug());
         Set<RestaurantAddress> restaurantAddresses = newRestaurantDetails.getRestaurantAddresses().stream().map(RestaurantAddressMapper::toEntity).collect(Collectors.toSet());
         restaurantAddresses.forEach(x -> x.setRestaurant(restaurant));
         restaurant.setRestaurantAddress(restaurantAddresses);

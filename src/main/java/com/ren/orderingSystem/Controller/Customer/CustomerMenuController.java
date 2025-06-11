@@ -2,7 +2,6 @@ package com.ren.orderingSystem.Controller.Customer;
 
 import com.ren.orderingSystem.ApiContracts.ResponseDto.GetCustomerMenuItemResponse;
 import com.ren.orderingSystem.Service.MenuService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +14,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/customer")
-public class MenuController {
+public class CustomerMenuController {
 
     private final MenuService menuService;
 
-    public MenuController(MenuService menuService) {
+    public CustomerMenuController(MenuService menuService) {
 
         this.menuService= menuService;
     }

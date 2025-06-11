@@ -19,11 +19,11 @@ public class CustomerAddress {
     @Column(name = "city", nullable = false)
     private String city;
 
-    @Column(name = "street_name")
-    private String streetName;
+    @Column(name = "street_address1")
+    private String streetAddress1;
 
-    @Column(name = "street_address")
-    private String streetAddress;
+    @Column(name = "street_address2")
+    private String streetAddress2;
 
     @Column(name = "pin_code")
     private String pinCode;

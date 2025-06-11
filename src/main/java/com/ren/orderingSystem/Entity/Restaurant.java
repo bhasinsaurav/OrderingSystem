@@ -2,6 +2,7 @@ package com.ren.orderingSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,11 +10,13 @@ import java.util.Set;
 @Entity
 @Data
 @Table(name = "restaurant")
+@EqualsAndHashCode(exclude = {"user", "restaurantAddress", "menuItems", "orders"})
 public class Restaurant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "restaurant_id", updatable = false, nullable = false)
+
     private long restaurantId;
 
     @Column(nullable = false, name = "contact_number")

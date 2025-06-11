@@ -1,5 +1,6 @@
 package com.ren.orderingSystem.Service;
 
+import com.ren.orderingSystem.ApiContracts.RequestDto.AdminLoginRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.RegisterAdminRequest;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.RegisterAdminResponse;
 import com.ren.orderingSystem.Entity.Restaurant;
@@ -8,7 +9,13 @@ import com.ren.orderingSystem.Mappers.RestaurantMapper;
 import com.ren.orderingSystem.Mappers.UserMapper;
 import com.ren.orderingSystem.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,21 +28,28 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final RestaurantMapper restaurantMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, RestaurantMapper restaurantMapper){
+    public UserService(UserRepository userRepository, UserMapper userMapper, RestaurantMapper restaurantMapper, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTService jwtService){
         this.userRepository = userRepository;
         this.userMapper= userMapper;
         this.restaurantMapper = restaurantMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @Transactional
-    private RegisterAdminResponse registerRestaurant(RegisterAdminRequest registerAdminRequest){
+    public RegisterAdminResponse registerRestaurant(RegisterAdminRequest registerAdminRequest) throws Exception {
         try {
             User user = new User();
             RegisterAdminResponse registerAdminResponse = new RegisterAdminResponse();
             user.setUserTimestamp(LocalDateTime.now());
+            user.setPassword(passwordEncoder.encode((registerAdminRequest.getPassword())));
             User userEntity = userMapper.toUserEntity(registerAdminRequest, user);
-            Restaurant restaurant = restaurantMapper.toRestaurantEntity(registerAdminRequest.getAddRestaurantDetailsRequest());
+            Restaurant restaurant = restaurantMapper.toRestaurantEntity(registerAdminRequest.getRestaurantDetails());
             restaurant.setUser(userEntity);
             userEntity.setRestaurant(restaurant);
             User savedUser = userRepository.save(userEntity);
@@ -43,6 +57,15 @@ public class UserService {
             return registerAdminResponse;
         } catch (Exception e) {
             log.error("Unable to create user", e);
+            throw new RuntimeException("Failed to register restaurant admin", e);
         }
+    }
+
+    public String verify(AdminLoginRequest adminLoginRequest) {
+
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(adminLoginRequest.getUserName(), adminLoginRequest.getPassword()));
+
+            return authentication.isAuthenticated()? jwtService.generateToken(adminLoginRequest.getUserName()) : "Failure";
+
     }
 }
