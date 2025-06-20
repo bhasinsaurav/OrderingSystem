@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RegisterAdminRequest {
+public class RegisterRestaurantRequest {
 
     private String firstName;
     private String lastName;
@@ -13,5 +13,5 @@ public class RegisterAdminRequest {
     private String email;
     private String password;
     private String phoneNumber;
-    private AddRestaurantDetailsRequest restaurantDetails;
+
 }
