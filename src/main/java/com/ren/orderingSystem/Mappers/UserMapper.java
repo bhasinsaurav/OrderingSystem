@@ -7,11 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public void toUserEntity(RegisterRestaurantRequest newRestaurant, User user){
+    public User toUserEntity(RegisterRestaurantRequest newRestaurant, User user){
         user.setFirstName(newRestaurant.getFirstName());
         user.setLastName(newRestaurant.getLastName());
-        user.setUserName(newRestaurant.getUserName());
+        user.setUserName(newRestaurant.getEmail());
         user.setEmail(newRestaurant.getEmail());
         user.setPhoneNumber(newRestaurant.getPhoneNumber());
+        return user;
     }
 }

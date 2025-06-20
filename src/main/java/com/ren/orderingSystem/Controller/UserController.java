@@ -4,6 +4,7 @@ import com.ren.orderingSystem.ApiContracts.RequestDto.AdminLoginRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.RegisterRestaurantRequest;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.RegisterAdminResponse;
 import com.ren.orderingSystem.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +20,7 @@ public class UserController {
    }
 
     @PostMapping("/register-restaurant")
-    public ResponseEntity<?> registerAdmin(@RequestBody RegisterRestaurantRequest registerAdminRequest) throws Exception {
+    public ResponseEntity<?> registerAdmin(@Valid @RequestBody RegisterRestaurantRequest registerAdminRequest) {
        userService.registerRestaurant(registerAdminRequest);
         return new ResponseEntity<>("Restaurant has been registered", HttpStatus.OK);
     }

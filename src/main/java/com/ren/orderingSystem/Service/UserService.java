@@ -38,17 +38,16 @@ public class UserService {
     }
 
     @Transactional
-    public void registerRestaurant(RegisterRestaurantRequest registerAdminRequest) throws Exception {
-        try {
-            User user = new User();
+    public User registerRestaurant(RegisterRestaurantRequest registerAdminRequest){
 
-            user.setUserTimestamp(LocalDateTime.now());
-            user.setPassword(passwordEncoder.encode((registerAdminRequest.getPassword())));
-            userMapper.toUserEntity(registerAdminRequest, user);
-        } catch (Exception e) {
-            log.error("Unable to create user", e);
-            throw new RuntimeException("Failed to register restaurant admin", e);
-        }
+        User user = new User();
+        user.setUserTimestamp(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode((registerAdminRequest.getPassword())));
+        User userEntity = userMapper.toUserEntity(registerAdminRequest, user);
+        userRepository.save(userEntity);
+        User savedUser = userRepository.findByUserName(user.getUserName());
+        return savedUser;
+
     }
 
     public String verify(AdminLoginRequest adminLoginRequest) {
