@@ -27,7 +27,7 @@ public class UserMapper {
     }
 
     public User oAuthToUser(User user, Map<String, Object> userInfo){
-            user.setFirstName((String) userInfo.get("given_name"));
+        user.setFirstName((String) userInfo.get("given_name"));
         user.setLastName((String) userInfo.get("family_name"));
         user.setUserTimestamp(LocalDateTime.now());
         user.setUserName((String) userInfo.get("email"));

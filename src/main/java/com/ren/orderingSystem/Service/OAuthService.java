@@ -7,7 +7,6 @@ import com.ren.orderingSystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -59,11 +58,17 @@ public class OAuthService {
 
         HttpEntity<MultiValueMap<String, String>> request =new HttpEntity<>(params, headers);
         ResponseEntity<Map> tokenResponse = restTemplate.postForEntity(tokenEndpoint, request, Map.class);
-        String idToken = (String) tokenResponse.getBody().get("id_token");
 
-        String userInfoUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+        String accessToken = (String) tokenResponse.getBody().get("access_token");
+        HttpHeaders infoHeaders = new HttpHeaders();
+        HttpEntity<MultiValueMap<String, String>> infoEntity = new HttpEntity<>(infoHeaders);
+        infoHeaders.setBearerAuth(accessToken);
+        ResponseEntity<Map> userInfoResponse = restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo",
+                HttpMethod.GET,
+                infoEntity,
+                Map.class);
 
-        ResponseEntity<Map> userInfoResponse =restTemplate.getForEntity(userInfoUrl, Map.class);
+
         if(userInfoResponse.getStatusCode() == HttpStatus.OK){
             Map<String, Object> userInfo = userInfoResponse.getBody();
             String email = (String) userInfo.get("email");

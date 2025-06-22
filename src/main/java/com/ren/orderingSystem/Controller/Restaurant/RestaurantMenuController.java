@@ -21,9 +21,14 @@ public class RestaurantMenuController {
     }
 
     @PostMapping("/addMenu/{userId}")
-    public ResponseEntity<?> addMenu(@RequestBody AddMenuItemRequest addMenuItemDto, @PathVariable UUID userId){
+    public ResponseEntity<AddMenuItemResponse> addMenu(@RequestBody AddMenuItemRequest addMenuItemDto, @PathVariable UUID userId){
         AddMenuItemResponse addMenuItemResponse = menuService.addMenuItem(addMenuItemDto, userId);
         return new ResponseEntity<>(addMenuItemResponse, HttpStatus.CREATED);
 
     }
+
+//    @PutMapping("/update-menuitem/{userId}")
+//    public ResponseEntity<?>  updateMenu(@PathVariable UUID user, @RequestBody ){
+//
+//    }
 }
