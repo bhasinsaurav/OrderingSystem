@@ -3,12 +3,11 @@ package com.ren.orderingSystem.ApiContracts.ResponseDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
-public class RegisterAdminResponse {
+public class RestaurantLoginResponse {
 
-    private UUID userId;
-
+    private Map<String, String> loginResponse;
 }

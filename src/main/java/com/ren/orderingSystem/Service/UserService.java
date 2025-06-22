@@ -1,8 +1,8 @@
 package com.ren.orderingSystem.Service;
 
-import com.ren.orderingSystem.ApiContracts.RequestDto.AdminLoginRequest;
+import com.ren.orderingSystem.ApiContracts.RequestDto.RestaurantLoginRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.RegisterRestaurantRequest;
-import com.ren.orderingSystem.Entity.Restaurant;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.RestaurantLoginResponse;
 import com.ren.orderingSystem.Entity.User;
 import com.ren.orderingSystem.Mappers.RestaurantMapper;
 import com.ren.orderingSystem.Mappers.UserMapper;
@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -50,11 +53,29 @@ public class UserService {
 
     }
 
-    public String verify(AdminLoginRequest adminLoginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(adminLoginRequest.getUserName(), adminLoginRequest.getPassword()));
+    public  boolean isRestaurantAvailable(User user){
+        return user.getRestaurant()!= null;
+    }
+    public RestaurantLoginResponse verify(RestaurantLoginRequest restaurantLoginRequest) {
+        RestaurantLoginResponse loginResponse = new RestaurantLoginResponse();
+        Map<String, String> responseMap = new HashMap<>();
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(restaurantLoginRequest.getUserName(), restaurantLoginRequest.getPassword()));
+        User user = userRepository.findByUserName(authenticate.getName());
+        String jwt = jwtService.generateToken(restaurantLoginRequest.getUserName());
+        responseMap.put("jwt", jwt);
 
-        return authentication.isAuthenticated() ? jwtService.generateToken(adminLoginRequest.getUserName()) : "Failure";
+        if(isRestaurantAvailable(user)){
+            responseMap.put("ResturantAvailable", "True");
+        }
+        else {
+            responseMap.put("ResturantAvailable", "False");
+
+        }
+        String userId = user.getUserId().toString();
+        responseMap.put("user_id", userId);
+        loginResponse.setLoginResponse(responseMap);
+        return loginResponse;
 
     }
 }

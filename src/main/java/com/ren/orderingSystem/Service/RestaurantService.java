@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RestaurantService {
 
+
     public void addRestaurantDetails(AddRestaurantDetailsRequest addRestaurantDetailsRequest){
 
     }
