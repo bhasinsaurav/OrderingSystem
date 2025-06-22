@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class OAuthService {
@@ -77,9 +78,9 @@ public class OAuthService {
 
 
             String jwt = jwtService.generateToken(email);
-            Map<String,String> responseMap = new HashMap<>();
+            Map<String,Object> responseMap = new HashMap<>();
             responseMap.put("jwt", jwt);
-            String userId = user.getUserId().toString();
+            UUID userId = user.getUserId();
             responseMap.put("user_id", userId);
             if(userService.isRestaurantAvailable(user)){
                 responseMap.put("ResturantAvailable", "True");

@@ -9,5 +9,5 @@ import java.util.Map;
 @NoArgsConstructor
 public class RestaurantLoginResponse {
 
-    private Map<String, String> loginResponse;
+    private Map<String, Object> loginResponse;
 }

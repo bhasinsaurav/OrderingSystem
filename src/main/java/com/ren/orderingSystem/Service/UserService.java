@@ -41,16 +41,13 @@ public class UserService {
     }
 
     @Transactional
-    public User registerRestaurant(RegisterRestaurantRequest registerAdminRequest){
+    public void registerRestaurant(RegisterRestaurantRequest registerAdminRequest){
 
         User user = new User();
         user.setUserTimestamp(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode((registerAdminRequest.getPassword())));
         User userEntity = userMapper.toUserEntity(registerAdminRequest, user);
         userRepository.save(userEntity);
-        User savedUser = userRepository.findByUserName(user.getUserName());
-        return savedUser;
-
     }
 
 
@@ -59,7 +56,7 @@ public class UserService {
     }
     public RestaurantLoginResponse verify(RestaurantLoginRequest restaurantLoginRequest) {
         RestaurantLoginResponse loginResponse = new RestaurantLoginResponse();
-        Map<String, String> responseMap = new HashMap<>();
+        Map<String, Object> responseMap = new HashMap<>();
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(restaurantLoginRequest.getUserName(), restaurantLoginRequest.getPassword()));
         User user = userRepository.findByUserName(authenticate.getName());
         String jwt = jwtService.generateToken(restaurantLoginRequest.getUserName());
@@ -72,7 +69,7 @@ public class UserService {
             responseMap.put("ResturantAvailable", "False");
 
         }
-        String userId = user.getUserId().toString();
+        UUID userId = user.getUserId();
         responseMap.put("user_id", userId);
         loginResponse.setLoginResponse(responseMap);
         return loginResponse;
