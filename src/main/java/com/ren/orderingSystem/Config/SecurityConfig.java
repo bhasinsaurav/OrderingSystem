@@ -36,6 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/user/public/**")
                         .permitAll()
+                        .requestMatchers("/customer/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated())
                     .sessionManagement(session ->
