@@ -12,7 +12,5 @@ import java.util.List;
 public class PlaceOrderRequest {
 
     private AddUserDetailForCustomerRequest addUserDetailForCustomerRequest;
-    @NotBlank(message = "Total Amount cannot be blank")
-    private BigDecimal totalAmount;
     private List<OrderedItemsRequest> orderedItemsRequestsList;
 }

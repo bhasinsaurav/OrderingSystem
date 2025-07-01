@@ -7,6 +7,7 @@ import com.ren.orderingSystem.Entity.OrderItems;
 import com.ren.orderingSystem.repository.MenuItemRepository;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -26,6 +27,8 @@ public class OrderItemsMapper {
         List<OrderItems> orderItemsList = menuItem.getOrderItems();
 
         orderItems.setMenuItem(menuItem);
+        orderItems.setItemPrice(menuItem.getPrice());
+        orderItems.setItemTotalPrice(menuItem.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
         orderItems.setQuantity(dto.getQuantity());
         orderItemsList.add(orderItems);
         menuItem.setOrderItems(orderItemsList);

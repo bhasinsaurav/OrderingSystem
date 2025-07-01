@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
         error.put("error", "Invalid username or password");
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<String> handleRestaurantNotFound(RestaurantNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }

@@ -3,11 +3,10 @@ package com.ren.orderingSystem.Service;
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddCustomerAddressRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.SendOrderToRestaurant;
 import com.ren.orderingSystem.Entity.*;
-import com.ren.orderingSystem.Mappers.CustomerAddressMapper;
-import com.ren.orderingSystem.Mappers.OrderItemsMapper;
-import com.ren.orderingSystem.Mappers.OrderMapper;
-import com.ren.orderingSystem.Mappers.UserMapper;
+import com.ren.orderingSystem.Exceptions.RestaurantNotFoundException;
+import com.ren.orderingSystem.Mappers.*;
 import com.ren.orderingSystem.repository.CustomerRepository;
 import com.ren.orderingSystem.repository.RestaurantRepository;
 import com.ren.orderingSystem.repository.UserRepository;
@@ -32,11 +31,13 @@ public class OrderService {
     private final OrderItemsMapper orderItemsMapper;
     private final RestaurantRepository restaurantRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketMapper webSocketMapper;
     @Autowired
     public OrderService(UserRepository userRepository, UserMapper userMapper,
                         CustomerRepository customerRepository, CustomerAddressMapper customerAddressMapper,
                         OrderMapper orderMapper, OrderItemsMapper orderItemsMapper,
-                        RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate){
+                        RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate,
+                        WebSocketMapper webSocketMapper){
         this.userRepository= userRepository;
         this.userMapper = userMapper;
         this.customerAddressMapper = customerAddressMapper;
@@ -44,13 +45,14 @@ public class OrderService {
         this.orderItemsMapper = orderItemsMapper;
         this.restaurantRepository= restaurantRepository;
         this.messagingTemplate= messagingTemplate;
+        this.webSocketMapper= webSocketMapper;
     }
 
     @Transactional
     public void placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
         Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
         Restaurant restaurant = byUserUserId
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found for user ID: " + restaurantUserId));
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
 
         User user = new User();
         user.setUserTimestamp(LocalDateTime.now());
@@ -70,13 +72,16 @@ public class OrderService {
 
 
         //Now map Order
+        // set order items in entity
+        List<OrderedItemsRequest> orderedItemsRequestsList = placeOrderRequest.getOrderedItemsRequestsList();
+
+        List<OrderItems> orderItemsList = orderedItemsRequestsList.stream().map(dto -> orderItemsMapper.toOrderItemsEntity(dto)).toList();
+
+        // populate order entity
         Order order = new Order();
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
-        Order orderEntity = orderMapper.toOrderEntity(placeOrderRequest, order);
-
-        List<OrderedItemsRequest> orderedItemsRequestsList = placeOrderRequest.getOrderedItemsRequestsList();
-        List<OrderItems> orderItemsList = orderedItemsRequestsList.stream().map(dto -> orderItemsMapper.toOrderItemsEntity(dto)).toList();
+        Order orderEntity = orderMapper.toOrderEntity(orderItemsList, order);
         orderItemsList.forEach(item -> item.setOrder(orderEntity));
 
         orderEntity.setOrderItems(orderItemsList);
@@ -92,13 +97,15 @@ public class OrderService {
         restaurant.setOrders(restaurantOrders);
         orderEntity.setRestaurant(restaurant);
 
-        userRepository.save(userEntity);
+        User savedUser = userRepository.save(userEntity);
+        SendOrderToRestaurant sendOrderToRestaurant = webSocketMapper.mapOrderToSendToRestaurant(savedUser);
+
 
         log.info("Username in service class is :" + restaurant.getUser().getUserName());
         messagingTemplate.convertAndSendToUser(
                 restaurant.getUser().getUserName(),
                 "/queue/new-order",
-                placeOrderRequest //
+                sendOrderToRestaurant
         );
 
     }
