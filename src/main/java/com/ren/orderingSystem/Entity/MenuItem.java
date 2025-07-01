@@ -2,6 +2,8 @@ package com.ren.orderingSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "menuitem")
+@EqualsAndHashCode(exclude = {"restaurant", "orderItems"})
+@ToString(exclude = {"restaurant", "orderItems"})
 public class MenuItem {
 
     @Id

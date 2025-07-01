@@ -3,6 +3,7 @@
     import jakarta.persistence.*;
     import lombok.Data;
     import lombok.EqualsAndHashCode;
+    import lombok.ToString;
 
     import java.time.LocalDateTime;
     import java.util.Set;
@@ -12,6 +13,7 @@
     @Table(name = "users")
     @Data
     @EqualsAndHashCode(exclude = {"restaurant" ,"customer"})
+    @ToString(exclude = {"restaurant", "customer"})
     public class User {
 
         @Id
@@ -34,7 +36,7 @@
         @Column(name = "email", unique = true, nullable = false)
         private String email;
 
-        @Column(name = "password", nullable = false)
+        @Column(name = "password")
         private String password;
 
         @Column(name = "phone_number")

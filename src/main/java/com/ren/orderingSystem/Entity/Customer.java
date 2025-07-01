@@ -2,6 +2,8 @@ package com.ren.orderingSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 
 import java.util.ArrayList;
@@ -13,15 +15,14 @@ import java.util.Set;
 @Entity
 @Table(name="customer")
 @Data
+@EqualsAndHashCode(exclude = {"orders", "customerAddresses", "user", "carts"})
+@ToString(exclude = {"orders", "customerAddresses", "user", "carts"})
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name= "customer_id", updatable = false, nullable = false)
     private long customerId;
-
-    @Column(name = "contact_number", nullable = false)
-    private String contactNumber;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -30,7 +31,7 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CustomerAddress> customerAddresses = new HashSet<>();
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Order> orders = new HashSet<>();
 
     @OneToMany(mappedBy = "customer")

@@ -1,5 +1,6 @@
 package com.ren.orderingSystem.Mappers;
 
+import com.ren.orderingSystem.ApiContracts.RequestDto.AddUserDetailForCustomerRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.RegisterRestaurantRequest;
 import com.ren.orderingSystem.Entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,15 @@ public class UserMapper {
         user.setUserName(newRestaurant.getEmail());
         user.setEmail(newRestaurant.getEmail());
         user.setPhoneNumber(newRestaurant.getPhoneNumber());
+        return user;
+    }
+
+    public User toUserEntity(User user, AddUserDetailForCustomerRequest addUserDetailForCustomerRequest){
+        user.setFirstName(addUserDetailForCustomerRequest.getFirstName());
+        user.setLastName(addUserDetailForCustomerRequest.getLastName());
+        user.setUserName(addUserDetailForCustomerRequest.getEmail());
+        user.setEmail(addUserDetailForCustomerRequest.getEmail());
+        user.setPhoneNumber(addUserDetailForCustomerRequest.getPhoneNumber());
         return user;
     }
 

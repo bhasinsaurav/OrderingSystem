@@ -10,11 +10,13 @@ import com.ren.orderingSystem.Mappers.MenuItemMapper;
 import com.ren.orderingSystem.repository.RestaurantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -32,7 +34,8 @@ public class MenuService {
 
     public List<GetCustomerMenuItemResponse> showAllMenuItemsToCustomer(UUID userId){
         Restaurant restaurant = restaurantRepository.findByUser_UserId(userId).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for given id"));
-        return restaurant.getMenuItems().stream().map(menuItemMapper::toCustomerResponseDto).toList();
+        Set<MenuItem> menuItemSet = restaurant.getMenuItems();
+        return menuItemSet.stream().map(menuItemMapper::toCustomerResponseDto).toList();
 
 
     }
@@ -44,6 +47,7 @@ public class MenuService {
         menuItem.setCreatedAt(LocalDateTime.now());
         menuItem.setUpdatedAt(LocalDateTime.now());
         MenuItem addedItemEntity = menuItemMapper.toMenuItemEntity(addedMenuItem, menuItem);
+        addedItemEntity.setRestaurant(restaurant);
         restaurant.getMenuItems().add(addedItemEntity);
         restaurantRepository.save(restaurant);
         AddMenuItemResponse menuItemResponse = menuItemMapper.toMenuItemResponse(addedItemEntity);

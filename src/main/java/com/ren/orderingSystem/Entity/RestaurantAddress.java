@@ -3,11 +3,13 @@ package com.ren.orderingSystem.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
 @Table(name = "restaurant_address")
 @EqualsAndHashCode(exclude = {"restaurant"})
+@ToString(exclude = {"restaurant"})
 public class RestaurantAddress {
 
     @Id

@@ -3,6 +3,7 @@ package com.ren.orderingSystem.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Data
 @Table(name = "restaurant")
 @EqualsAndHashCode(exclude = {"user", "restaurantAddress", "menuItems", "orders"})
+@ToString(exclude = {"user", "restaurantAddress", "menuItems", "orders"})
 public class Restaurant {
 
     @Id

@@ -2,10 +2,14 @@ package com.ren.orderingSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
 @Table(name = "customer_address")
+@EqualsAndHashCode(exclude = {"customer"})
+@ToString(exclude = {"customer"})
 public class CustomerAddress {
 
     @Id
