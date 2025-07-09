@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/user/public")
+
 public class UserController {
 
    private final UserService userService;

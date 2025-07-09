@@ -39,10 +39,10 @@ public class WebSocketMapper {
         customerInfo.setIncludeCustomerAddressInfo(customerAddressInfo);
 
         //Setting up Order Items info to send to frontend
-        IncludeOrderItemsInfo orderItemsInfo = new IncludeOrderItemsInfo();
+
         List<IncludeOrderItemsInfo> orderItems = order
                 .getOrderItems().stream()
-                .map(orderItems1 -> includeOrderItemsInfo(orderItems1, orderItemsInfo))
+                .map(this::includeOrderItemsInfo)
                 .toList();
 
         // Seeting up objects to the reference in web socket dto
@@ -52,7 +52,8 @@ public class WebSocketMapper {
         return sendOrderToRestaurant;
     }
 
-    public IncludeOrderItemsInfo includeOrderItemsInfo(OrderItems orderItems, IncludeOrderItemsInfo includeOrderItemsInfo){
+    public IncludeOrderItemsInfo includeOrderItemsInfo(OrderItems orderItems){
+        IncludeOrderItemsInfo includeOrderItemsInfo = new IncludeOrderItemsInfo();
         includeOrderItemsInfo.setItemName(orderItems.getMenuItem().getItemName());
         includeOrderItemsInfo.setQuantity(orderItems.getQuantity());
         includeOrderItemsInfo.setItemPrice(orderItems.getItemPrice());

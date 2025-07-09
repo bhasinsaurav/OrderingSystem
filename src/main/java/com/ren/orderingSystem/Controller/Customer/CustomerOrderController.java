@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/customer")
+
 public class CustomerOrderController {
 
     private final OrderService orderService;
@@ -21,7 +22,7 @@ public class CustomerOrderController {
     }
     @PostMapping("/place-order/{userId}")
     public ResponseEntity<?> placeOrder(@PathVariable UUID userId, @RequestBody PlaceOrderRequest placeOrderRequest){
-        orderService.placeOrder(placeOrderRequest, userId);
-        return new ResponseEntity<>("Ordered", HttpStatus.OK);
+        String userToken = orderService.placeOrder(placeOrderRequest, userId);
+        return new ResponseEntity<>(userToken, HttpStatus.OK);
     }
 }

@@ -33,3 +33,8 @@ logging:
         web:
           socket: DEBUG
 
+springdoc:
+  swagger-ui:
+    url:  ${CLOUDFLARE_URL}/v3/api-docs
+server:
+  forward-headers-strategy: framework

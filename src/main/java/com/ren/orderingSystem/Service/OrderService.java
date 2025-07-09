@@ -32,12 +32,14 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketMapper webSocketMapper;
+    private final JWTService jwtService;
+
     @Autowired
     public OrderService(UserRepository userRepository, UserMapper userMapper,
                         CustomerRepository customerRepository, CustomerAddressMapper customerAddressMapper,
                         OrderMapper orderMapper, OrderItemsMapper orderItemsMapper,
                         RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate,
-                        WebSocketMapper webSocketMapper){
+                        WebSocketMapper webSocketMapper, JWTService jwtService){
         this.userRepository= userRepository;
         this.userMapper = userMapper;
         this.customerAddressMapper = customerAddressMapper;
@@ -46,10 +48,11 @@ public class OrderService {
         this.restaurantRepository= restaurantRepository;
         this.messagingTemplate= messagingTemplate;
         this.webSocketMapper= webSocketMapper;
+        this.jwtService= jwtService;
     }
 
     @Transactional
-    public void placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+    public String placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
         Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
         Restaurant restaurant = byUserUserId
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
@@ -101,12 +104,15 @@ public class OrderService {
         SendOrderToRestaurant sendOrderToRestaurant = webSocketMapper.mapOrderToSendToRestaurant(savedUser);
 
 
-        log.info("Username in service class is :" + restaurant.getUser().getUserName());
+        log.info("Username in service class is: " + restaurant.getUser().getUserName());
         messagingTemplate.convertAndSendToUser(
                 restaurant.getUser().getUserName(),
                 "/queue/new-order",
                 sendOrderToRestaurant
         );
+
+        String jwtToken = jwtService.generateToken(savedUser.getUserName());
+        return jwtToken;
 
     }
 }
