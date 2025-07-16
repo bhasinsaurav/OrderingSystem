@@ -52,7 +52,7 @@ public class OrderService {
     }
 
     @Transactional
-    public String placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+    public UUID placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
         Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
         Restaurant restaurant = byUserUserId
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
@@ -111,8 +111,7 @@ public class OrderService {
                 sendOrderToRestaurant
         );
 
-        String jwtToken = jwtService.generateToken(savedUser.getUserName());
-        return jwtToken;
+        return savedUser.getUserId();
 
     }
 }
