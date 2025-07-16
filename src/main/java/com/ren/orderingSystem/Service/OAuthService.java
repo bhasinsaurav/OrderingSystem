@@ -50,7 +50,7 @@ public class OAuthService {
         params.add("code", code);
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
-        params.add("redirect_uri", "https://developers.google.com/oauthplayground");
+        params.add("redirect_uri", "http://localhost:5173/oauth2/redirect");
         params.add("grant_type", "authorization_code");
 
         HttpHeaders headers = new HttpHeaders();
@@ -88,10 +88,10 @@ public class OAuthService {
             UUID userId = user.getUserId();
             responseMap.put("user_id", userId);
             if(userService.isRestaurantAvailable(user)){
-                responseMap.put("ResturantAvailable", "True");
+                responseMap.put("RestaurantAvailable", "True");
             }
             else{
-                responseMap.put("RestaurantAvaible", "False");
+                responseMap.put("RestaurantAvailable", "False");
             }
 
             restaurantLoginResponse.setLoginResponse(responseMap);

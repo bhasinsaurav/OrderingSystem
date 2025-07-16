@@ -3,14 +3,12 @@ package com.ren.orderingSystem.Service;
 
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddMenuItemRequest;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.AddMenuItemResponse;
-import com.ren.orderingSystem.ApiContracts.ResponseDto.GetCustomerMenuItemResponse;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.GetMenuItemResponse;
 import com.ren.orderingSystem.Entity.MenuItem;
 import com.ren.orderingSystem.Entity.Restaurant;
+import com.ren.orderingSystem.Exceptions.RestaurantNotFoundException;
 import com.ren.orderingSystem.Mappers.MenuItemMapper;
 import com.ren.orderingSystem.repository.RestaurantRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,17 +30,17 @@ public class MenuService {
         this.menuItemMapper = menuItemMapper;
     }
 
-    public List<GetCustomerMenuItemResponse> showAllMenuItemsToCustomer(UUID userId){
-        Restaurant restaurant = restaurantRepository.findByUser_UserId(userId).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for given id"));
+    public List<GetMenuItemResponse> showMenuItemsToUser(UUID userId){
+        Restaurant restaurant = restaurantRepository.findByUser_UserId(userId).orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for given id"));
         Set<MenuItem> menuItemSet = restaurant.getMenuItems();
-        return menuItemSet.stream().map(menuItemMapper::toCustomerResponseDto).toList();
+        return menuItemSet.stream().map(menuItemMapper::toGetMenuResponseDto).toList();
 
 
     }
 
     @Transactional
     public AddMenuItemResponse addMenuItem(AddMenuItemRequest addedMenuItem, UUID userId){
-        Restaurant restaurant = restaurantRepository.findByUser_UserId((userId)).orElseThrow(() -> new EntityNotFoundException("No restauarnt associated with given userId"));
+        Restaurant restaurant = restaurantRepository.findByUser_UserId((userId)).orElseThrow(() -> new RestaurantNotFoundException("No restauarnt associated with given userId"));
         MenuItem menuItem = new MenuItem();
         menuItem.setCreatedAt(LocalDateTime.now());
         menuItem.setUpdatedAt(LocalDateTime.now());

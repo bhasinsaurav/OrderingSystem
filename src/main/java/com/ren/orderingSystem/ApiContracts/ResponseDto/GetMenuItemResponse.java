@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
-public class GetCustomerMenuItemResponse {
+public class GetMenuItemResponse {
 
     private long itemId;
     private String description;

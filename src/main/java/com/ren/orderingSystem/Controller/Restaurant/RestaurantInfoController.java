@@ -1,6 +1,8 @@
 package com.ren.orderingSystem.Controller.Restaurant;
 
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddRestaurantDetailsRequest;
+import com.ren.orderingSystem.ApiContracts.RequestDto.UpdateRestaurantInfoRequestDto;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.RestaurantDetailsInfoResponse;
 import com.ren.orderingSystem.Service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,13 @@ public class RestaurantInfoController {
     }
     @PostMapping("restaurant-detail-entry/{userId}")
     public ResponseEntity<?>  addRestaurantDetail(@PathVariable UUID userId, @RequestBody AddRestaurantDetailsRequest addRestaurantDetailsRequest){
-         restaurantService.addRestaurantDetails(addRestaurantDetailsRequest, userId);
+        RestaurantDetailsInfoResponse restaurantDetailsInfoResponse = restaurantService.addRestaurantDetails(addRestaurantDetailsRequest, userId);
+        return new ResponseEntity<>(restaurantDetailsInfoResponse,HttpStatus.OK);
+    }
+
+    @PutMapping("restaurant-detail-update/{userId}")
+    public ResponseEntity<?>  updateRestaurantDetail(@PathVariable UUID userId, @RequestBody UpdateRestaurantInfoRequestDto updateRestaurantInfoRequestDto){
+         restaurantService.updateRestaurantDetails(updateRestaurantInfoRequestDto, userId);
          return new ResponseEntity<>(HttpStatus.OK);
     }
 }

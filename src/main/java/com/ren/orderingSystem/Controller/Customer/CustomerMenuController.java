@@ -1,6 +1,6 @@
 package com.ren.orderingSystem.Controller.Customer;
 
-import com.ren.orderingSystem.ApiContracts.ResponseDto.GetCustomerMenuItemResponse;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.GetMenuItemResponse;
 import com.ren.orderingSystem.Service.MenuService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class CustomerMenuController {
     @GetMapping("/getMenu/{userId}")
     public ResponseEntity<?> getMenu(@PathVariable UUID userId){
 
-        List<GetCustomerMenuItemResponse> menuItemsDtos = menuService.showAllMenuItemsToCustomer(userId);
+        List<GetMenuItemResponse> menuItemsDtos = menuService.showMenuItemsToUser(userId);
         return new ResponseEntity<>(menuItemsDtos,HttpStatus.OK);
     }
 }
