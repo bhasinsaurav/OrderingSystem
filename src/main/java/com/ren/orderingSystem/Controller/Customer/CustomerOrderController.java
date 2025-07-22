@@ -1,6 +1,7 @@
 package com.ren.orderingSystem.Controller.Customer;
 
 import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.CustomerOrderResponse;
 import com.ren.orderingSystem.Service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,10 @@ public class CustomerOrderController {
     public CustomerOrderController(OrderService orderService){
         this.orderService = orderService;
     }
+
     @PostMapping("/place-order/{userId}")
     public ResponseEntity<?> placeOrder(@PathVariable UUID userId, @RequestBody PlaceOrderRequest placeOrderRequest){
-        UUID customerId = orderService.placeOrder(placeOrderRequest, userId);
-        return new ResponseEntity<>(customerId, HttpStatus.OK);
+        CustomerOrderResponse customerOrderResponse = orderService.placeOrder(placeOrderRequest, userId);
+        return new ResponseEntity<>(customerOrderResponse, HttpStatus.OK);
     }
 }

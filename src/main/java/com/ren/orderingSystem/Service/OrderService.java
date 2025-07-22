@@ -3,11 +3,14 @@ package com.ren.orderingSystem.Service;
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddCustomerAddressRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.CustomerOrderResponse;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.SendOrderToRestaurant;
 import com.ren.orderingSystem.Entity.*;
+import com.ren.orderingSystem.Enum.OrderStatus;
 import com.ren.orderingSystem.Exceptions.RestaurantNotFoundException;
 import com.ren.orderingSystem.Mappers.*;
 import com.ren.orderingSystem.repository.CustomerRepository;
+import com.ren.orderingSystem.repository.OrderRepository;
 import com.ren.orderingSystem.repository.RestaurantRepository;
 import com.ren.orderingSystem.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +35,14 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketMapper webSocketMapper;
-    private final JWTService jwtService;
+    private final OrderRepository orderRepository;
 
     @Autowired
     public OrderService(UserRepository userRepository, UserMapper userMapper,
                         CustomerRepository customerRepository, CustomerAddressMapper customerAddressMapper,
                         OrderMapper orderMapper, OrderItemsMapper orderItemsMapper,
                         RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate,
-                        WebSocketMapper webSocketMapper, JWTService jwtService){
+                        WebSocketMapper webSocketMapper, OrderRepository orderRepository){
         this.userRepository= userRepository;
         this.userMapper = userMapper;
         this.customerAddressMapper = customerAddressMapper;
@@ -48,11 +51,12 @@ public class OrderService {
         this.restaurantRepository= restaurantRepository;
         this.messagingTemplate= messagingTemplate;
         this.webSocketMapper= webSocketMapper;
-        this.jwtService= jwtService;
+        this.orderRepository= orderRepository;
     }
 
     @Transactional
-    public UUID placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+    public CustomerOrderResponse placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+        CustomerOrderResponse customerOrderResponse = new CustomerOrderResponse();
         Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
         Restaurant restaurant = byUserUserId
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
@@ -111,7 +115,16 @@ public class OrderService {
                 sendOrderToRestaurant
         );
 
-        return savedUser.getUserId();
+        Order savedOrder = orderRepository.findTopByCustomer_CustomerIdOrderByCreatedAtDesc(savedUser.getCustomer().getCustomerId());
+        customerOrderResponse.setOrderId(savedOrder.getOrderId());
+        customerOrderResponse.setOrderStatus(savedOrder.getOrderStatus().toString());
+        return customerOrderResponse;
 
+    }
+
+    public void updateStatus(UUID customerId, String orderStatus){
+        User user = userRepository.getReferenceById(customerId);
+        Set<Order> orders = user.getCustomer().getOrders();
+        orders.stream().filter(order -> order.getOrderStatus().equals(order));
     }
 }
