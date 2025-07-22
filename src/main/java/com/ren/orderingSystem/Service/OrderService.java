@@ -62,27 +62,35 @@ public class OrderService {
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
 
         User user = new User();
-        user.setUserTimestamp(LocalDateTime.now());
-        User userEntity = userMapper.toUserEntity(user, placeOrderRequest.getAddUserDetailForCustomerRequest());
-
         Customer customer = new Customer();
-        customer.setUser(userEntity); // Link user to customer
-        userEntity.setCustomer(customer);
+        try {
+            user = userRepository.findByUserName(placeOrderRequest.getAddUserDetailForCustomerRequest().getEmail());
+            customer= user.getCustomer();
+        } catch(Exception e) {
+
+
+            user.setUserTimestamp(LocalDateTime.now());
+            user = userMapper.toUserEntity(user, placeOrderRequest.getAddUserDetailForCustomerRequest());
+
+            customer.setUser(user); // Link user to customer
+            user.setCustomer(customer);
+
 
 // Now map addresses
 
-        Set<AddCustomerAddressRequest> addCustomerAddressRequest = placeOrderRequest.getAddUserDetailForCustomerRequest().getAddCustomerDetailRequest().getCustomerAddressRequestList();
-        Set<CustomerAddress> addressEntities = addCustomerAddressRequest.stream()
-                .map(dto -> customerAddressMapper.toCustomerAddressEntity(dto,  customer))
-                .collect(Collectors.toSet());
-        customer.setCustomerAddresses(addressEntities);
+            Set<AddCustomerAddressRequest> addCustomerAddressRequest = placeOrderRequest.getAddUserDetailForCustomerRequest().getAddCustomerDetailRequest().getCustomerAddressRequestList();
+            Customer finalCustomer = customer;
+            Set<CustomerAddress> addressEntities = addCustomerAddressRequest.stream()
+                    .map(dto -> customerAddressMapper.toCustomerAddressEntity(dto, finalCustomer))
+                    .collect(Collectors.toSet());
+            customer.setCustomerAddresses(addressEntities);
+        }
 
+            //Now map Order
+            // set order items in entity
+            List<OrderedItemsRequest> orderedItemsRequestsList = placeOrderRequest.getOrderedItemsRequestsList();
 
-        //Now map Order
-        // set order items in entity
-        List<OrderedItemsRequest> orderedItemsRequestsList = placeOrderRequest.getOrderedItemsRequestsList();
-
-        List<OrderItems> orderItemsList = orderedItemsRequestsList.stream().map(dto -> orderItemsMapper.toOrderItemsEntity(dto)).toList();
+            List<OrderItems> orderItemsList = orderedItemsRequestsList.stream().map(dto -> orderItemsMapper.toOrderItemsEntity(dto)).toList();
 
         // populate order entity
         Order order = new Order();
@@ -104,7 +112,8 @@ public class OrderService {
         restaurant.setOrders(restaurantOrders);
         orderEntity.setRestaurant(restaurant);
 
-        User savedUser = userRepository.save(userEntity);
+        User savedUser = userRepository.saveAndFlush(user);
+        savedUser = userRepository.findByIdWithCustomer(savedUser.getUserId()).orElseThrow(() -> new RuntimeException("User not found after save"));
         SendOrderToRestaurant sendOrderToRestaurant = webSocketMapper.mapOrderToSendToRestaurant(savedUser);
 
 
