@@ -3,6 +3,7 @@ package com.ren.orderingSystem.Service;
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddCustomerAddressRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
+import com.ren.orderingSystem.ApiContracts.RequestDto.UpdateStatusDto;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.CustomerOrderResponse;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.SendOrderToRestaurant;
 import com.ren.orderingSystem.Entity.*;
@@ -131,9 +132,28 @@ public class OrderService {
 
     }
 
-    public void updateStatus(UUID customerId, String orderStatus){
-        User user = userRepository.getReferenceById(customerId);
-        Set<Order> orders = user.getCustomer().getOrders();
-        orders.stream().filter(order -> order.getOrderStatus().equals(order));
+    public void updateStatus(UpdateStatusDto updateStatusDto, UUID customerUserId) {
+        String orderStatus = updateStatusDto.getOrderStatus();
+        Order orderByOrderId = orderRepository.getOrderByOrderId(updateStatusDto.getOrderId());
+        if (orderStatus.equals("Accepted")) {
+            orderByOrderId.setOrderStatus(OrderStatus.ACCEPTED);
+        } else if (orderStatus.equals("Rejected")) {
+            orderByOrderId.setOrderStatus(OrderStatus.REJECTED);
+        } else if (orderStatus.equals("Prepared")) {
+            orderByOrderId.setOrderStatus(OrderStatus.PREPARED);
+        } else if (orderStatus.equals("Delivered")) {
+            orderByOrderId.setOrderStatus(OrderStatus.DELIVERED);
+        } else if (orderStatus.equals("Cancelled")) {
+            orderByOrderId.setOrderStatus(OrderStatus.CANCELED);
+        }
+
+        orderRepository.saveAndFlush(orderByOrderId);
+
+        messagingTemplate.convertAndSend(
+                "/topic/order-status/" + customerUserId+"/"+ orderByOrderId.getOrderId(),
+                orderByOrderId.getOrderStatus().toString()
+        );
+
     }
+
 }

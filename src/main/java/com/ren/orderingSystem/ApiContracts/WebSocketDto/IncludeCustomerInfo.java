@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 public class IncludeCustomerInfo {
 
+    private UUID customerUserId;
     private String firstName;
     private String lastName;
     private String phoneNumber;

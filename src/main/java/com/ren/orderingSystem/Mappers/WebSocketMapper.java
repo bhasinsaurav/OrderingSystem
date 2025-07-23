@@ -32,6 +32,7 @@ public class WebSocketMapper {
 
         // Setting up customer info to send in webSocket
         IncludeCustomerInfo customerInfo = new IncludeCustomerInfo();
+        customerInfo.setCustomerUserId(user.getUserId());
         customerInfo.setEmail(user.getEmail());
         customerInfo.setFirstName(user.getFirstName());
         customerInfo.setLastName(user.getLastName());

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class AddMenuItemResponse {
 
+    private Long menuItemId;
     private String description;
     private BigDecimal price;
     private String category;

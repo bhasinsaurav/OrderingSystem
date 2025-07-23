@@ -31,6 +31,7 @@ public class MenuItemMapper {
 
     public AddMenuItemResponse toMenuItemResponse(MenuItem menuItem){
         AddMenuItemResponse dto = new AddMenuItemResponse();
+        dto.setMenuItemId(menuItem.getItemId());
         dto.setDescription(menuItem.getDescription());
         dto.setItemName(menuItem.getItemName());
         dto.setPrice(menuItem.getPrice());
