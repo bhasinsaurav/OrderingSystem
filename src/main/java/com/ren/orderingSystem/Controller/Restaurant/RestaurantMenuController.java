@@ -4,6 +4,7 @@ import com.ren.orderingSystem.ApiContracts.RequestDto.AddMenuItemRequest;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.AddMenuItemResponse;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.GetMenuItemResponse;
 import com.ren.orderingSystem.Service.MenuService;
+import com.ren.orderingSystem.Service.S3Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,12 @@ import java.util.UUID;
 public class RestaurantMenuController {
 
     private final MenuService menuService;
+    private final S3Service s3Service;
 
-    public RestaurantMenuController(MenuService menuService) {
+    public RestaurantMenuController(MenuService menuService, S3Service s3Service) {
 
         this.menuService= menuService;
+        this.s3Service = s3Service;
     }
 
     @PostMapping("/addMenu/{userId}")
@@ -28,6 +31,20 @@ public class RestaurantMenuController {
         AddMenuItemResponse addMenuItemResponse = menuService.addMenuItem(addMenuItemDto, userId);
         return new ResponseEntity<>(addMenuItemResponse, HttpStatus.CREATED);
 
+    }
+
+    @GetMapping("/uploadMenuImage/{userId}")
+    public ResponseEntity<?> uploadMenuImage(@PathVariable UUID userId, @RequestParam Long menuItemId){
+
+        String presignedPutUrl = s3Service.generatePutPresignedUrl(menuItemId.toString(), userId.toString());
+        return new ResponseEntity<>(presignedPutUrl, HttpStatus.OK);
+    }
+
+    @GetMapping("/getMenuImage/{userId}")
+    public ResponseEntity<?> getMenuImage(@PathVariable UUID userId, @RequestParam Long menuItemId){
+
+        String presignedGetUrl = s3Service.generateGetPresignedUrl(menuItemId.toString(), userId.toString());
+        return new ResponseEntity<>(presignedGetUrl, HttpStatus.OK);
     }
 
     @GetMapping("/getMenu/{userId}")

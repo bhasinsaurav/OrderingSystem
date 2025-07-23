@@ -32,7 +32,17 @@ logging:
         messaging: DEBUG
         web:
           socket: DEBUG
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+        static: ${AWS_REGION}
 
+aws:
+  bucket:
+    name: ${AWS_BUCKET_NAME}
 springdoc:
   swagger-ui:
     url:  ${CLOUDFLARE_URL}/v3/api-docs
