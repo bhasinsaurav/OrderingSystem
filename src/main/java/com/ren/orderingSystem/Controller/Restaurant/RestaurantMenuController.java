@@ -1,8 +1,10 @@
 package com.ren.orderingSystem.Controller.Restaurant;
 
 import com.ren.orderingSystem.ApiContracts.RequestDto.AddMenuItemRequest;
+import com.ren.orderingSystem.ApiContracts.RequestDto.UpdateMenuItemRequest;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.AddMenuItemResponse;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.GetMenuItemResponse;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.S3UrlResponse;
 import com.ren.orderingSystem.Service.MenuService;
 import com.ren.orderingSystem.Service.S3Service;
 import org.springframework.http.HttpStatus;
@@ -36,14 +38,14 @@ public class RestaurantMenuController {
     @GetMapping("/uploadMenuImage/{userId}")
     public ResponseEntity<?> uploadMenuImage(@PathVariable UUID userId, @RequestParam Long menuItemId){
 
-        String presignedPutUrl = s3Service.generatePutPresignedUrl(menuItemId.toString(), userId.toString());
+        S3UrlResponse presignedPutUrl = s3Service.generatePutPresignedUrl(menuItemId.toString(), userId.toString());
         return new ResponseEntity<>(presignedPutUrl, HttpStatus.OK);
     }
 
     @GetMapping("/getMenuImage/{userId}")
     public ResponseEntity<?> getMenuImage(@PathVariable UUID userId, @RequestParam Long menuItemId){
 
-        String presignedGetUrl = s3Service.generateGetPresignedUrl(menuItemId.toString(), userId.toString());
+        S3UrlResponse presignedGetUrl = s3Service.generateGetPresignedUrl(menuItemId.toString(), userId.toString());
         return new ResponseEntity<>(presignedGetUrl, HttpStatus.OK);
     }
 
@@ -54,8 +56,11 @@ public class RestaurantMenuController {
         return new ResponseEntity<>(menuItemsDtos,HttpStatus.OK);
     }
 
-//    @PutMapping("/update-menuitem/{userId}")
-//    public ResponseEntity<?>  updateMenu(@PathVariable UUID user, @RequestBody ){
-//
-//    }
+    @PutMapping("/update-menuitem/{userId}")
+    public ResponseEntity<?>  updateMenu(@PathVariable UUID userId, @RequestBody UpdateMenuItemRequest updateMenuItemRequest){
+
+        GetMenuItemResponse updatedMenuItemResponse = menuService.updateMenuItem(updateMenuItemRequest, userId);
+        return new ResponseEntity<>(updatedMenuItemResponse, HttpStatus.OK);
+
+    }
 }

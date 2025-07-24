@@ -28,9 +28,6 @@ public class MenuItem {
     @Column(name= "price")
     private BigDecimal price;
 
-    @Lob
-    private byte[] itemImage;
-
     @Column(name="menuitem_category")
     private String category;
 

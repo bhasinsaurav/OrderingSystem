@@ -1,15 +1,13 @@
-package com.ren.orderingSystem.ApiContracts.ResponseDto;
+package com.ren.orderingSystem.ApiContracts.RequestDto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
-@NoArgsConstructor
-public class GetMenuItemResponse {
+public class UpdateMenuItemRequest {
 
-    private long itemId;
+    private Long menuItemId;
     private String description;
     private BigDecimal price;
     private String category;

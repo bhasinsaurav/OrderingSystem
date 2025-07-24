@@ -4,4 +4,7 @@ import com.ren.orderingSystem.Entity.MenuItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
+
+    MenuItem findByItemName(String itemName);
+    MenuItem getMenuItemByItemId(Long menuItemId);
 }

@@ -1,5 +1,6 @@
 package com.ren.orderingSystem.Service;
 
+import com.ren.orderingSystem.ApiContracts.ResponseDto.S3UrlResponse;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,10 @@ public class S3Service {
     public S3Service(S3Presigner s3Presigner) {
         this.s3Presigner = s3Presigner;
     }
-    public String generateGetPresignedUrl(String menuItemId, String restaurantUserId) {
+    public S3UrlResponse generateGetPresignedUrl(String menuItemId, String restaurantUserId) {
 
         String filePath = "restaurant/" + restaurantUserId + "/menu/" + menuItemId + ".jpg";
+        S3UrlResponse urlResponse = new S3UrlResponse();
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(filePath)
@@ -40,11 +42,13 @@ public class S3Service {
                 .build();
 
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
-        return presignedRequest.url().toString();
+        urlResponse.setS3Url(presignedRequest.url().toString());
+        return urlResponse;
     }
 
-    public String generatePutPresignedUrl(String menuItemId, String restaurantUserId) {
+    public S3UrlResponse generatePutPresignedUrl(String menuItemId, String restaurantUserId) {
         String filePath = "restaurant/" + restaurantUserId + "/menu/" + menuItemId + ".jpg";
+        S3UrlResponse urlResponse = new S3UrlResponse();
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(filePath)
@@ -57,6 +61,7 @@ public class S3Service {
                 .build();
 
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
-        return presignedRequest.url().toString();
+        urlResponse.setS3Url(presignedRequest.url().toString());
+        return urlResponse;
     }
 }
