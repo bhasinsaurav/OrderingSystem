@@ -4,8 +4,8 @@ import com.ren.orderingSystem.ApiContracts.RequestDto.AddCustomerAddressRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
 import com.ren.orderingSystem.ApiContracts.RequestDto.UpdateStatusDto;
-import com.ren.orderingSystem.ApiContracts.ResponseDto.CustomerOrderResponse;
-import com.ren.orderingSystem.ApiContracts.WebSocketDto.SendOrderToRestaurant;
+import com.ren.orderingSystem.ApiContracts.ResponseDto.TotalOrdersResponse;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.OrderResponse;
 import com.ren.orderingSystem.Entity.*;
 import com.ren.orderingSystem.Enum.OrderStatus;
 import com.ren.orderingSystem.Exceptions.RestaurantNotFoundException;
@@ -56,20 +56,23 @@ public class OrderService {
     }
 
     @Transactional
-    public CustomerOrderResponse placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
-        CustomerOrderResponse customerOrderResponse = new CustomerOrderResponse();
+    public OrderResponse placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+
         Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
         Restaurant restaurant = byUserUserId
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
 
         User user = new User();
         Customer customer = new Customer();
-        try {
-            user = userRepository.findByUserName(placeOrderRequest.getAddUserDetailForCustomerRequest().getEmail());
-            customer= user.getCustomer();
-        } catch(Exception e) {
 
+            User byUserName = userRepository.findByUserName(placeOrderRequest.getAddUserDetailForCustomerRequest().getEmail());
+            if(byUserName != null) {
+                user = byUserName;
+                customer= user.getCustomer();
+            }
+            else{
 
+            log.info("Creating new customer with email: {}", placeOrderRequest.getAddUserDetailForCustomerRequest().getEmail());
             user.setUserTimestamp(LocalDateTime.now());
             user = userMapper.toUserEntity(user, placeOrderRequest.getAddUserDetailForCustomerRequest());
 
@@ -115,20 +118,17 @@ public class OrderService {
 
         User savedUser = userRepository.saveAndFlush(user);
         savedUser = userRepository.findByIdWithCustomer(savedUser.getUserId()).orElseThrow(() -> new RuntimeException("User not found after save"));
-        SendOrderToRestaurant sendOrderToRestaurant = webSocketMapper.mapOrderToSendToRestaurant(savedUser);
+        OrderResponse sendOrderInfo = webSocketMapper.mapOrderToSendToResponse(savedUser, null);
 
 
         log.info("Username in service class is: " + restaurant.getUser().getUserName());
         messagingTemplate.convertAndSendToUser(
                 restaurant.getUser().getUserName(),
                 "/queue/new-order",
-                sendOrderToRestaurant
+                sendOrderInfo
         );
 
-        Order savedOrder = orderRepository.findTopByCustomer_CustomerIdOrderByCreatedAtDesc(savedUser.getCustomer().getCustomerId());
-        customerOrderResponse.setOrderId(savedOrder.getOrderId());
-        customerOrderResponse.setOrderStatus(savedOrder.getOrderStatus().toString());
-        return customerOrderResponse;
+        return sendOrderInfo;
 
     }
 
@@ -154,6 +154,16 @@ public class OrderService {
                 orderByOrderId.getOrderStatus().toString()
         );
 
+    }
+
+    public TotalOrdersResponse getTotalOrdersByUserId(UUID userId ) {
+        TotalOrdersResponse totalOrdersResponse = new TotalOrdersResponse();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RestaurantNotFoundException("No user found with ID: " + userId));
+        Set<Order> orders = user.getRestaurant().getOrders();
+        List<OrderResponse> allOrderList = orders.stream().map(order -> webSocketMapper.mapOrderToSendToResponse(null, order))
+                .toList();
+        totalOrdersResponse.setAllOrders(allOrderList);
+        return totalOrdersResponse;
     }
 
 }

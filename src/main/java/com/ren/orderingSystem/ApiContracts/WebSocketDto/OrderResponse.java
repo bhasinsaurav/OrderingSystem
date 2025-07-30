@@ -8,9 +8,11 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class SendOrderToRestaurant {
+public class OrderResponse {
 
     private BigDecimal orderTotal;
     private IncludeCustomerInfo includeCustomerInfo;
     private List<IncludeOrderItemsInfo> orderItemsInfo;
+    private Long orderId;
+    private String orderStatus;
 }

@@ -19,4 +19,5 @@ public class OrderMapper {
         order.setTotalAmount(totalAmount);
         return order;
     }
+
 }

@@ -3,23 +3,30 @@ package com.ren.orderingSystem.Mappers;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeCustomerAddressInfo;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeCustomerInfo;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeOrderItemsInfo;
-import com.ren.orderingSystem.ApiContracts.WebSocketDto.SendOrderToRestaurant;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.OrderResponse;
 import com.ren.orderingSystem.Entity.CustomerAddress;
 import com.ren.orderingSystem.Entity.Order;
 import com.ren.orderingSystem.Entity.OrderItems;
 import com.ren.orderingSystem.Entity.User;
+import com.ren.orderingSystem.repository.OrderRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 
 @Component
 public class WebSocketMapper {
-    public SendOrderToRestaurant mapOrderToSendToRestaurant(User user){
 
-        SendOrderToRestaurant sendOrderToRestaurant = new SendOrderToRestaurant();
-        Order order = user.getCustomer().getOrders().iterator().next();
+    private final OrderRepository orderRepository;
 
+    public WebSocketMapper(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+    public OrderResponse mapOrderToSendToResponse(User user, Order order){
+
+        OrderResponse sendOrderResponse = new OrderResponse();
+        if(order==null && user!=null) {
+            order = orderRepository.findTopByCustomer_CustomerIdOrderByCreatedAtDesc(user.getCustomer().getCustomerId());
+        }
         //Setting yp customer address info
         IncludeCustomerAddressInfo customerAddressInfo = new IncludeCustomerAddressInfo();
         CustomerAddress customerAddress = user.getCustomer().getCustomerAddresses().iterator().next();
@@ -47,10 +54,12 @@ public class WebSocketMapper {
                 .toList();
 
         // Seeting up objects to the reference in web socket dto
-        sendOrderToRestaurant.setOrderItemsInfo(orderItems);
-        sendOrderToRestaurant.setIncludeCustomerInfo(customerInfo);
-        sendOrderToRestaurant.setOrderTotal(order.getTotalAmount());
-        return sendOrderToRestaurant;
+        sendOrderResponse.setOrderItemsInfo(orderItems);
+        sendOrderResponse.setIncludeCustomerInfo(customerInfo);
+        sendOrderResponse.setOrderTotal(order.getTotalAmount());
+        sendOrderResponse.setOrderId(order.getOrderId());
+        sendOrderResponse.setOrderStatus(order.getOrderStatus().toString());
+        return sendOrderResponse;
     }
 
     public IncludeOrderItemsInfo includeOrderItemsInfo(OrderItems orderItems){
