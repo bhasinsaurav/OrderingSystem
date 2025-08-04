@@ -67,4 +67,12 @@ public class RestaurantService {
             RestaurantAddress restaurantAddress1 = new RestaurantAddress();
         }
     }
+
+    public RestaurantDetailsInfoResponse getRestaurantDetail(UUID userId) {
+        Optional<User> byId = userRepository.findById(userId);
+        User user = byId.get();
+        Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(userId);
+        Restaurant restaurant = byUserUserId.orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + userId));
+        return restaurantMapper.toRestaurantDetailsInfoResponse(restaurant);
+    }
 }

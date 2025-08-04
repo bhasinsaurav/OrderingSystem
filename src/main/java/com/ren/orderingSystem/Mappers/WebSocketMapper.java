@@ -29,7 +29,12 @@ public class WebSocketMapper {
         }
         //Setting yp customer address info
         IncludeCustomerAddressInfo customerAddressInfo = new IncludeCustomerAddressInfo();
-        CustomerAddress customerAddress = user.getCustomer().getCustomerAddresses().iterator().next();
+        CustomerAddress customerAddress;
+
+        if(user == null && order != null) {
+            user = order.getCustomer().getUser();
+        }
+        customerAddress = user.getCustomer().getCustomerAddresses().iterator().next();
         customerAddressInfo.setCountry(customerAddress.getCountry());
         customerAddressInfo.setCity(customerAddress.getCity());
         customerAddressInfo.setStreetAddress1(customerAddress.getStreetAddress1());

@@ -34,4 +34,11 @@ public class RestaurantInfoController {
          restaurantService.updateRestaurantDetails(updateRestaurantInfoRequestDto, userId);
          return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("restaurant-detail/{userId}")
+    public ResponseEntity<?> getRestaurantDetail(@PathVariable UUID userId){
+        RestaurantDetailsInfoResponse restaurantDetail = restaurantService.getRestaurantDetail(userId);
+        return new ResponseEntity<>(restaurantDetail, HttpStatus.OK);
+
+    }
 }
