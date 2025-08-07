@@ -91,7 +91,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of("*")); // Accept all origins
         configuration.setAllowedMethods(List.of("*")); // All typical HTTP methods
         configuration.setAllowedHeaders(List.of("*")); // Accept all headers
-        configuration.setAllowCredentials(true); // Accept cookies, tokens, etc.
+        configuration.setAllowCredentials(false); // Accept cookies, tokens, etc.
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
