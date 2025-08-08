@@ -38,6 +38,12 @@ public class SecurityConfig {
     @Value("${FRONTEND_LOCALHOST_URL}")
     private String frontendLocalhostUrl;
 
+    @Value("${Customer_Vercel_Link}")
+    private String customerVercelLink;
+
+    @Value("${Restaurant_Vercel_Link}")
+    private String restaurantVercelLink;
+
     @Autowired
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter){
         this.userDetailsService = userDetailsService;
@@ -88,7 +94,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(frontendLocalhostUrl, cloudflareurl,"http://localhost:5174", "chrome-extension://naoflmcibkeeikeeikddbobigeopafjl")); // Accept all origins
+        configuration.setAllowedOriginPatterns(List.of(frontendLocalhostUrl, cloudflareurl,"http://localhost:5174", "chrome-extension://naoflmcibkeeikeeikddbobigeopafjl", customerVercelLink, restaurantVercelLink)); // Accept all origins
         configuration.setAllowedMethods(List.of("*")); // All typical HTTP methods
         configuration.setAllowedHeaders(List.of("*")); // Accept all headers
         configuration.setAllowCredentials(true); // Accept cookies, tokens, etc.
