@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://ep-tiny-mountain-aebogbpo-pooler.c-2.us-east-2.aws.neon.tech:5432/Ren
-    username: neondb_owner
-    password: ${NEON_DB_PASS}
+    url: jdbc:postgresql://ren.c14w880i02gv.ca-central-1.rds.amazonaws.com:5432/ren
+    username: postgres
+    password: ${AWS_RDS_PASS}
   jpa:
     show:
       sql: true
