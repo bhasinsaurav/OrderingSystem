@@ -4,11 +4,14 @@ import com.ren.orderingSystem.Entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Set;
 
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-
-    Order findTopByCustomer_CustomerIdOrderByCreatedAtDesc(Long customerId);
+    
 
     Order getOrderByOrderId(long orderId);
+
+    List<Order> findByRestaurantId(Long restaurantId);
+    List<Order> findByCustomerId(Long customerId);
 }

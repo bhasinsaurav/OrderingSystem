@@ -26,7 +26,7 @@ public class RestaurantOrderController {
     }
 
     @GetMapping("/getOrders/{restaurantUserId}")
-    public ResponseEntity<TotalOrdersResponse> getOrders(@PathVariable UUID restaurantUserId) {
+    public ResponseEntity<TotalOrdersResponse> getOrders(@PathVariable long restaurantUserId) {
         TotalOrdersResponse totalOrdersByUserId = orderService.getTotalOrdersByUserId(restaurantUserId);
         return new ResponseEntity<>(totalOrdersByUserId, HttpStatus.OK);
 

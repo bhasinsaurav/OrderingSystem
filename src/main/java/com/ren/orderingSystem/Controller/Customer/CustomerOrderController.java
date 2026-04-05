@@ -23,7 +23,7 @@ public class CustomerOrderController {
     }
 
     @PostMapping("/place-order/{userId}")
-    public ResponseEntity<OrderResponse> placeOrder(@PathVariable UUID userId, @RequestBody PlaceOrderRequest placeOrderRequest){
+    public ResponseEntity<OrderResponse> placeOrder(@PathVariable long userId, @RequestBody PlaceOrderRequest placeOrderRequest){
         OrderResponse customerOrderResponse = orderService.placeOrder(placeOrderRequest, userId);
         return new ResponseEntity<>(customerOrderResponse, HttpStatus.OK);
     }

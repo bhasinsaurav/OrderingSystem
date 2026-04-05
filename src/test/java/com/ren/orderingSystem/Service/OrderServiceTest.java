@@ -13,7 +13,6 @@ import com.ren.orderingSystem.repository.RestaurantRepository;
 import com.ren.orderingSystem.repository.UserRepository;
 import com.ren.orderingSystem.Mappers.OrderMapper;
 import com.ren.orderingSystem.Mappers.OrderItemsMapper;
-import com.ren.orderingSystem.Mappers.WebSocketMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

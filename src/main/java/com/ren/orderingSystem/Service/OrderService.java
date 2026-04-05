@@ -1,10 +1,10 @@
 package com.ren.orderingSystem.Service;
 
-import com.ren.orderingSystem.ApiContracts.RequestDto.AddCustomerAddressRequest;
-import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
-import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
-import com.ren.orderingSystem.ApiContracts.RequestDto.UpdateStatusDto;
+import com.ren.orderingSystem.ApiContracts.RequestDto.*;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.TotalOrdersResponse;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeCustomerAddressInfo;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeCustomerInfo;
+import com.ren.orderingSystem.ApiContracts.WebSocketDto.IncludeOrderItemsInfo;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.OrderResponse;
 import com.ren.orderingSystem.Entity.*;
 import com.ren.orderingSystem.Enum.OrderStatus;
@@ -20,6 +20,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class OrderService {
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketMapper webSocketMapper;
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
     public OrderService(UserRepository userRepository, UserMapper userMapper,
@@ -53,13 +55,15 @@ public class OrderService {
         this.messagingTemplate= messagingTemplate;
         this.webSocketMapper= webSocketMapper;
         this.orderRepository= orderRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Transactional
-    public OrderResponse placeOrder(PlaceOrderRequest placeOrderRequest, UUID restaurantUserId){
+    public OrderResponse placeOrder(PlaceOrderRequest placeOrderRequest, long restaurantUserId){
 
-        Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(restaurantUserId);
-        Restaurant restaurant = byUserUserId
+
+        Optional<Restaurant> byId = restaurantRepository.findById(restaurantUserId);
+        Restaurant restaurant = byId
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + restaurantUserId));
 
         User user = new User();
@@ -83,55 +87,107 @@ public class OrderService {
 // Now map addresses
 
             Set<AddCustomerAddressRequest> addCustomerAddressRequest = placeOrderRequest.getAddUserDetailForCustomerRequest().getAddCustomerDetailRequest().getCustomerAddressRequestList();
-            Customer finalCustomer = customer;
-            Set<CustomerAddress> addressEntities = addCustomerAddressRequest.stream()
+                Customer finalCustomer = customer;
+                Set<CustomerAddress> addressEntities = addCustomerAddressRequest.stream()
                     .map(dto -> customerAddressMapper.toCustomerAddressEntity(dto, finalCustomer))
                     .collect(Collectors.toSet());
             customer.setCustomerAddresses(addressEntities);
         }
+        User savedUser = userRepository.save(user);
+        //create order request object for order service
+            OrderRequestToOrderService orderRequestToOrderService = new OrderRequestToOrderService();
+            orderRequestToOrderService.setCustomerId(savedUser.getCustomer().getCustomerId());
+            orderRequestToOrderService.setRestaurantId(restaurantUserId);
+            orderRequestToOrderService.setOrderedItemsRequests(placeOrderRequest.getOrderedItemsRequestsList());
+        OrderResponse orderResponse = placeOrderInOrderService(orderRequestToOrderService);
 
-            //Now map Order
-            // set order items in entity
-            List<OrderedItemsRequest> orderedItemsRequestsList = placeOrderRequest.getOrderedItemsRequestsList();
+        IncludeCustomerAddressInfo customerAddressInfo = new IncludeCustomerAddressInfo();
+        CustomerAddress customerAddress;
 
-            List<OrderItems> orderItemsList = orderedItemsRequestsList.stream().map(dto -> orderItemsMapper.toOrderItemsEntity(dto)).toList();
+        customerAddress = savedUser.getCustomer().getCustomerAddresses().iterator().next();
+        customerAddressInfo.setCountry(customerAddress.getCountry());
+        customerAddressInfo.setCity(customerAddress.getCity());
+        customerAddressInfo.setStreetAddress1(customerAddress.getStreetAddress1());
+        customerAddressInfo.setStreetAddress2(customerAddress.getStreetAddress2());
+        customerAddressInfo.setPinCode(customerAddress.getPinCode());
+        customerAddressInfo.setProvince(customerAddress.getProvince());
 
-        // populate order entity
-        Order order = new Order();
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        Order orderEntity = orderMapper.toOrderEntity(orderItemsList, order);
-        orderItemsList.forEach(item -> item.setOrder(orderEntity));
+        // Setting up customer info to send in webSocket
+        IncludeCustomerInfo customerInfo = new IncludeCustomerInfo();
+        customerInfo.setCustomerUserId(user.getUserId());
+        customerInfo.setEmail(user.getEmail());
+        customerInfo.setFirstName(user.getFirstName());
+        customerInfo.setLastName(user.getLastName());
+        customerInfo.setPhoneNumber(user.getPhoneNumber());
+        customerInfo.setIncludeCustomerAddressInfo(customerAddressInfo);
 
-        orderEntity.setOrderItems(orderItemsList);
 
-        //Connect each entity
-        Set<Order> orderSet = customer.getOrders() != null ? customer.getOrders() : new HashSet<>();
-        orderSet.add(orderEntity);
-        customer.setOrders(orderSet);
-        orderEntity.setCustomer(customer);
-
-        Set<Order> restaurantOrders = restaurant.getOrders() != null ? restaurant.getOrders() : new HashSet<>();
-        restaurantOrders.add(orderEntity);
-        restaurant.setOrders(restaurantOrders);
-        orderEntity.setRestaurant(restaurant);
-
-        User savedUser = userRepository.saveAndFlush(user);
-        savedUser = userRepository.findByIdWithCustomer(savedUser.getUserId()).orElseThrow(() -> new RuntimeException("User not found after save"));
-        OrderResponse sendOrderInfo = webSocketMapper.mapOrderToSendToResponse(savedUser, null);
+        orderResponse.setIncludeCustomerInfo(customerInfo);
 
 
         log.info("Username in service class is: " + restaurant.getUser().getUserName());
         messagingTemplate.convertAndSendToUser(
                 restaurant.getUser().getUserName(),
                 "/queue/new-order",
-                sendOrderInfo
+                orderResponse
         );
 
-        return sendOrderInfo;
+        return orderResponse;
 
     }
 
+    public OrderResponse placeOrderInOrderService(OrderRequestToOrderService orderRequestToOrderService){
+        List<OrderItems> orderItems = new ArrayList<>();
+        BigDecimal orderTotal = BigDecimal.ZERO;
+
+        //Create list of Order Items
+
+
+        //Create and save Order
+        Order order = new Order();
+
+
+        for(OrderedItemsRequest orderedItemsRequest : orderRequestToOrderService.getOrderedItemsRequests()){
+            OrderItems orderItem =  new OrderItems();
+            orderItem.setMenuItemName(orderedItemsRequest.getMenuItemName());
+            orderItem.setItemPrice(orderedItemsRequest.getMenuItemPrice());
+            orderItem.setMenuItemId(orderedItemsRequest.getMenuItemId());
+            orderItem.setQuantity(orderedItemsRequest.getQuantity());
+            BigDecimal itemTotal = orderedItemsRequest.getMenuItemPrice().multiply(BigDecimal.valueOf(orderedItemsRequest.getQuantity()));
+            orderItem.setItemTotalPrice(itemTotal);
+            orderTotal = orderTotal.add(itemTotal);
+            orderItem.setOrder(order);
+            orderItems.add(orderItem);
+        }
+
+        order.setCustomerId(orderRequestToOrderService.getCustomerId());
+        order.setRestaurantId(orderRequestToOrderService.getRestaurantId());
+        order.setOrderItems(orderItems);
+        order.setTotalAmount(orderTotal);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.PENDING);
+
+        Order savedOrder = orderRepository.save(order);
+
+        List<IncludeOrderItemsInfo> includeOrderItemsInfos = new ArrayList<>();
+        for(OrderItems orderItem : savedOrder.getOrderItems()){
+            IncludeOrderItemsInfo includeOrderItemsInfo = new IncludeOrderItemsInfo();
+            includeOrderItemsInfo.setItemName(orderItem.getMenuItemName());
+            includeOrderItemsInfo.setItemPrice(orderItem.getItemPrice());
+            includeOrderItemsInfo.setQuantity(orderItem.getQuantity());
+            includeOrderItemsInfo.setItemTotalPrice(orderItem.getItemTotalPrice());
+            includeOrderItemsInfos.add(includeOrderItemsInfo);
+        }
+        OrderResponse response =  new OrderResponse();
+        response.setOrderId(savedOrder.getOrderId());
+        response.setOrderItemsInfo(includeOrderItemsInfos);
+        response.setOrderTotal(savedOrder.getTotalAmount());
+        response.setOrderStatus(savedOrder.getOrderStatus());
+
+        return response;
+
+    }
     public void updateStatus(UpdateStatusDto updateStatusDto, UUID customerUserId) {
         String orderStatus = updateStatusDto.getOrderStatus();
         Order orderByOrderId = orderRepository.getOrderByOrderId(updateStatusDto.getOrderId());
@@ -155,15 +211,4 @@ public class OrderService {
         );
 
     }
-
-    public TotalOrdersResponse getTotalOrdersByUserId(UUID userId ) {
-        TotalOrdersResponse totalOrdersResponse = new TotalOrdersResponse();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RestaurantNotFoundException("No user found with ID: " + userId));
-        Set<Order> orders = user.getRestaurant().getOrders();
-        List<OrderResponse> allOrderList = orders.stream().map(order -> webSocketMapper.mapOrderToSendToResponse(null, order))
-                .toList();
-        totalOrdersResponse.setAllOrders(allOrderList);
-        return totalOrdersResponse;
-    }
-
 }

@@ -9,6 +9,4 @@ import java.util.UUID;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
-    @EntityGraph(attributePaths = {"menuItems", "restaurantAddress"})
-    Optional<Restaurant> findByUser_UserId(UUID userId);
 }

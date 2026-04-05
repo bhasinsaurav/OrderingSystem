@@ -1,5 +1,6 @@
 package com.ren.orderingSystem.ApiContracts.WebSocketDto;
 
+import com.ren.orderingSystem.Enum.OrderStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,5 +15,5 @@ public class OrderResponse {
     private IncludeCustomerInfo includeCustomerInfo;
     private List<IncludeOrderItemsInfo> orderItemsInfo;
     private Long orderId;
-    private String orderStatus;
+    private OrderStatus orderStatus;
 }
