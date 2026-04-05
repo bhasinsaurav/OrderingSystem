@@ -7,11 +7,14 @@ import com.ren.orderingSystem.ApiContracts.ResponseDto.AddMenuItemResponse;
 import com.ren.orderingSystem.ApiContracts.ResponseDto.GetMenuItemResponse;
 import com.ren.orderingSystem.Entity.MenuItem;
 import com.ren.orderingSystem.Entity.Restaurant;
+import com.ren.orderingSystem.Entity.User;
 import com.ren.orderingSystem.Exceptions.RestaurantNotFoundException;
 import com.ren.orderingSystem.Mappers.MenuItemMapper;
 import com.ren.orderingSystem.repository.MenuItemRepository;
 import com.ren.orderingSystem.repository.RestaurantRepository;
+import com.ren.orderingSystem.repository.UserRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,19 +30,24 @@ public class MenuService {
     private final MenuItemMapper menuItemMapper;
     private final MenuItemRepository menuItemRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserDestinationResolver userDestinationResolver;
+    private final UserRepository userRepository;
 
     // Constructor for dependency injection
     public MenuService(RestaurantRepository restaurantRepository,
                        MenuItemMapper menuItemMapper, MenuItemRepository menuItemRepository,
-                        SimpMessagingTemplate messagingTemplate) {
+                       SimpMessagingTemplate messagingTemplate, UserDestinationResolver userDestinationResolver, UserRepository userRepository) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemMapper = menuItemMapper;
         this.menuItemRepository = menuItemRepository;
         this.messagingTemplate = messagingTemplate;
+        this.userDestinationResolver = userDestinationResolver;
+        this.userRepository = userRepository;
     }
 
     public List<GetMenuItemResponse> showMenuItemsToUser(UUID userId){
-        Restaurant restaurant = restaurantRepository.findByUser_UserId(userId).orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for given id"));
+        User referenceById = userRepository.getReferenceById(userId);
+        Restaurant restaurant = referenceById.getRestaurant();
         Set<MenuItem> menuItemSet = restaurant.getMenuItems();
         return menuItemSet.stream().map(menuItemMapper::toGetMenuResponseDto).toList();
 
@@ -48,7 +56,8 @@ public class MenuService {
 
     @Transactional
     public AddMenuItemResponse addMenuItem(AddMenuItemRequest addedMenuItem, UUID userId){
-        Restaurant restaurant = restaurantRepository.findByUser_UserId((userId)).orElseThrow(() -> new RestaurantNotFoundException("No restauarnt associated with given userId"));
+        User referenceById = userRepository.getReferenceById(userId);
+        Restaurant restaurant = referenceById.getRestaurant();
         MenuItem menuItem = new MenuItem();
         menuItem.setCreatedAt(LocalDateTime.now());
         menuItem.setUpdatedAt(LocalDateTime.now());

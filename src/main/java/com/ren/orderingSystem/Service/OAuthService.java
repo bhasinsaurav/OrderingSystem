@@ -26,10 +26,10 @@ public class OAuthService {
     private final UserRepository userRepository;
     private final JWTService jwtService;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+  //  @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+  //  @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
 
     @Autowired

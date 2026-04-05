@@ -33,27 +33,22 @@ public class OrderService {
     private final UserMapper userMapper;
     private final CustomerAddressMapper customerAddressMapper;
     private final OrderMapper orderMapper;
-    private final OrderItemsMapper orderItemsMapper;
     private final RestaurantRepository restaurantRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final WebSocketMapper webSocketMapper;
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
 
     @Autowired
     public OrderService(UserRepository userRepository, UserMapper userMapper,
                         CustomerRepository customerRepository, CustomerAddressMapper customerAddressMapper,
-                        OrderMapper orderMapper, OrderItemsMapper orderItemsMapper,
-                        RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate,
-                        WebSocketMapper webSocketMapper, OrderRepository orderRepository){
+                        OrderMapper orderMapper,
+                        RestaurantRepository restaurantRepository, SimpMessagingTemplate messagingTemplate, OrderRepository orderRepository){
         this.userRepository= userRepository;
         this.userMapper = userMapper;
         this.customerAddressMapper = customerAddressMapper;
         this.orderMapper = orderMapper;
-        this.orderItemsMapper = orderItemsMapper;
         this.restaurantRepository= restaurantRepository;
         this.messagingTemplate= messagingTemplate;
-        this.webSocketMapper= webSocketMapper;
         this.orderRepository= orderRepository;
         this.customerRepository = customerRepository;
     }
@@ -210,5 +205,13 @@ public class OrderService {
                 orderByOrderId.getOrderStatus().toString()
         );
 
+    }
+
+    public TotalOrdersResponse getOrdersByRestaurantId(long restaurantId){
+
+        List<Order> byRestaurantId = orderRepository.findByRestaurantId(restaurantId);
+        TotalOrdersResponse totalOrdersResponse = new TotalOrdersResponse();
+        totalOrdersResponse.setAllOrders(byRestaurantId);
+        return totalOrdersResponse;
     }
 }

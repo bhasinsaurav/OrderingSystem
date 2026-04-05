@@ -27,7 +27,7 @@ public class RestaurantOrderController {
 
     @GetMapping("/getOrders/{restaurantUserId}")
     public ResponseEntity<TotalOrdersResponse> getOrders(@PathVariable long restaurantUserId) {
-        TotalOrdersResponse totalOrdersByUserId = orderService.getTotalOrdersByUserId(restaurantUserId);
+        TotalOrdersResponse totalOrdersByUserId = orderService.getOrdersByRestaurantId(restaurantUserId);
         return new ResponseEntity<>(totalOrdersByUserId, HttpStatus.OK);
 
     }

@@ -50,8 +50,7 @@ public class RestaurantService {
     public void updateRestaurantDetails(UpdateRestaurantInfoRequestDto updateRestaurantInfoRequestDto, UUID userId) {
         Optional<User> byId = userRepository.findById(userId);
         User user = byId.get();
-        Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(userId);
-        Restaurant restaurant = byUserUserId.orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + userId));
+        Restaurant restaurant = user.getRestaurant();
         Restaurant updatedRestaurant = restaurantMapper.updateRestaurantFromDto(updateRestaurantInfoRequestDto, restaurant);
         Set<RestaurantAddress> restaurantAddress = updatedRestaurant.getRestaurantAddress();
         Optional<RestaurantAddress> first = restaurantAddress.stream()
@@ -71,8 +70,10 @@ public class RestaurantService {
     public RestaurantDetailsInfoResponse getRestaurantDetail(UUID userId) {
         Optional<User> byId = userRepository.findById(userId);
         User user = byId.get();
-        Optional<Restaurant> byUserUserId = restaurantRepository.findByUser_UserId(userId);
-        Restaurant restaurant = byUserUserId.orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found for user ID: " + userId));
+        Restaurant restaurant = user.getRestaurant();
+        if(restaurant==null){
+            throw new RestaurantNotFoundException("No available restaurant for given user id.");
+        }
         return restaurantMapper.toRestaurantDetailsInfoResponse(restaurant);
     }
 }

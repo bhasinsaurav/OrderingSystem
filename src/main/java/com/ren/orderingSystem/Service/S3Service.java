@@ -20,8 +20,8 @@ public class S3Service {
 
     private final S3Presigner s3Presigner;
 
-    @Value("${AWS_BUCKET_NAME}")
-    private String bucketName;
+  //  @Value("${AWS_BUCKET_NAME}")
+    private String bucketName = "menu";
 
     public S3Service(S3Presigner s3Presigner) {
         this.s3Presigner = s3Presigner;

@@ -47,7 +47,5 @@ public class MenuItem {
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
-    @OneToMany(mappedBy = "menuItem")
-    private List<OrderItems> orderItems = new ArrayList<>();
 
 }

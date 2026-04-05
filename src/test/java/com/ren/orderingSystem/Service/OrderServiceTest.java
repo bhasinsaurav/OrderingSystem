@@ -1,18 +1,10 @@
 package com.ren.orderingSystem.Service;
 
-import com.ren.orderingSystem.ApiContracts.RequestDto.PlaceOrderRequest;
-import com.ren.orderingSystem.ApiContracts.RequestDto.AddUserDetailForCustomerRequest;
-import com.ren.orderingSystem.ApiContracts.RequestDto.OrderedItemsRequest;
+import com.ren.orderingSystem.ApiContracts.RequestDto.*;
 import com.ren.orderingSystem.ApiContracts.WebSocketDto.OrderResponse;
-import com.ren.orderingSystem.Entity.Order;
-import com.ren.orderingSystem.Entity.Restaurant;
-import com.ren.orderingSystem.Entity.User;
-import com.ren.orderingSystem.Entity.Customer;
-import com.ren.orderingSystem.repository.OrderRepository;
-import com.ren.orderingSystem.repository.RestaurantRepository;
-import com.ren.orderingSystem.repository.UserRepository;
-import com.ren.orderingSystem.Mappers.OrderMapper;
-import com.ren.orderingSystem.Mappers.OrderItemsMapper;
+import com.ren.orderingSystem.Entity.*;
+import com.ren.orderingSystem.Mappers.*;
+import com.ren.orderingSystem.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,69 +26,94 @@ public class OrderServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private RestaurantRepository restaurantRepository;
     @Mock private OrderRepository orderRepository;
-    @Mock private OrderMapper orderMapper;
-    @Mock private OrderItemsMapper orderItemsMapper;
-    @Mock private WebSocketMapper webSocketMapper;
+    @Mock private UserMapper userMapper;
+    @Mock private CustomerAddressMapper customerAddressMapper;
     @Mock private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private OrderService orderService;
 
-    private UUID restaurantUserId;
-    private PlaceOrderRequest request;
+    private PlaceOrderRequest placeOrderRequest;
+    private long restaurantId = 1L;
 
     @BeforeEach
     void setUp() {
-        restaurantUserId = UUID.randomUUID();
-        request = new PlaceOrderRequest();
+        placeOrderRequest = new PlaceOrderRequest();
         
-        AddUserDetailForCustomerRequest userRequest = new AddUserDetailForCustomerRequest();
-        userRequest.setEmail("test@customer.com");
-        request.setAddUserDetailForCustomerRequest(userRequest);
+        // Mock User Request
+        AddUserDetailForCustomerRequest userDetailRequest = new AddUserDetailForCustomerRequest();
+        userDetailRequest.setEmail("customer@test.com");
         
-        OrderedItemsRequest itemRequest = new OrderedItemsRequest();
-        itemRequest.setMenuItemId(101L);
-        request.setOrderedItemsRequestsList(List.of(itemRequest));
+        AddCustomerDetailRequest customerDetailRequest = new AddCustomerDetailRequest();
+        AddCustomerAddressRequest addressRequest = new AddCustomerAddressRequest();
+        addressRequest.setCity("Toronto");
+        addressRequest.setCountry("Canada");
+        customerDetailRequest.setCustomerAddressRequestList(Set.of(addressRequest));
+        userDetailRequest.setAddCustomerDetailRequest(customerDetailRequest);
+        
+        placeOrderRequest.setAddUserDetailForCustomerRequest(userDetailRequest);
+
+        // Mock Ordered Items
+        OrderedItemsRequest item = new OrderedItemsRequest();
+        item.setMenuItemId(101L);
+        item.setMenuItemName("Burger");
+        item.setMenuItemPrice(new BigDecimal("10.00"));
+        item.setQuantity(2L);
+        placeOrderRequest.setOrderedItemsRequestsList(List.of(item));
     }
 
     @Test
-    void testPlaceOrder_Success_Decoupled() {
+    void testPlaceOrder_Success_Orchestration() {
         // Arrange
         Restaurant restaurant = new Restaurant();
-        restaurant.setRestaurantId(1L);
+        restaurant.setRestaurantId(restaurantId);
         User restaurantUser = new User();
-        restaurantUser.setUserName("restaurant_owner");
+        restaurantUser.setUserName("owner_user");
         restaurant.setUser(restaurantUser);
-        
-        User customerUser = new User();
-        Customer customer = new Customer();
-        customer.setCustomerId(99L);
-        customerUser.setCustomer(customer);
 
-        when(restaurantRepository.findByUser_UserId(restaurantUserId)).thenReturn(Optional.of(restaurant));
-        when(userRepository.findByUserName("test@customer.com")).thenReturn(customerUser);
+        User existingUser = new User();
+        Customer existingCustomer = new Customer();
+        existingCustomer.setCustomerId(500L);
         
-        // Mocking the behavior where the service saves the ORDER, not the USER
-        when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArguments()[0]);
-        when(webSocketMapper.mapOrderToSendToResponse(any(), any())).thenReturn(new OrderResponse());
+        CustomerAddress address = new CustomerAddress();
+        address.setCity("Toronto");
+        existingCustomer.setCustomerAddresses(Set.of(address));
+        
+        existingUser.setCustomer(existingCustomer);
+        existingUser.setUserId(UUID.randomUUID());
+        existingUser.setEmail("customer@test.com");
+
+        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
+        when(userRepository.findByUserName("customer@test.com")).thenReturn(existingUser);
+        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        
+        // Mock the internal save to verify it works independently
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
+            Order o = invocation.getArgument(0);
+            o.setOrderId(999L);
+            return o;
+        });
 
         // Act
-        OrderResponse response = orderService.placeOrder(request, restaurantUserId);
+        OrderResponse response = orderService.placeOrder(placeOrderRequest, restaurantId);
 
         // Assert
         assertNotNull(response);
+        assertEquals(999L, response.getOrderId());
         
-        // CRITICAL MIGRATION CHECKS:
-        // 1. Verify we used the ID-only link
+        // VERIFY DECOUPLING:
+        // 1. Verify we extracted the Customer ID correctly
         verify(orderRepository).save(argThat(order -> 
-            order.getCustomer() == 99L && 
-            order.getRestaurant() == 1L
+            order.getCustomerId() == 500L && 
+            order.getRestaurantId() == restaurantId &&
+            order.getTotalAmount().compareTo(new BigDecimal("20.00")) == 0
         ));
-        
-        // 2. Verify we didn't try to save the whole user aggregate (The "Old Way")
-        verify(userRepository, never()).saveAndFlush(any());
-        
-        // 3. Verify notification was sent
-        verify(messagingTemplate).convertAndSendToUser(eq("restaurant_owner"), anyString(), any(OrderResponse.class));
+
+        // 2. Verify WebSocket notification was attempted for the correct restaurant user
+        verify(messagingTemplate).convertAndSendToUser(
+                eq("owner_user"), 
+                eq("/queue/new-order"), 
+                any(OrderResponse.class)
+        );
     }
 }

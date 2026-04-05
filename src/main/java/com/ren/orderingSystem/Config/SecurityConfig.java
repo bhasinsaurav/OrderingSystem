@@ -32,17 +32,17 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
 
-    @Value("${CLOUDFLARE_URL}")
-    private String cloudflareurl;
-
-    @Value("${FRONTEND_LOCALHOST_URL}")
-    private String frontendLocalhostUrl;
-
-    @Value("${Customer_Vercel_Link}")
-    private String customerVercelLink;
-
-    @Value("${Restaurant_Vercel_Link}")
-    private String restaurantVercelLink;
+//    @Value("${CLOUDFLARE_URL}")
+//    private String cloudflareurl;
+//
+//    @Value("${FRONTEND_LOCALHOST_URL}")
+//    private String frontendLocalhostUrl;
+//
+////    @Value("${Customer_Vercel_Link}")
+////    private String customerVercelLink;
+//
+//    @Value("${Restaurant_Vercel_Link}")
+//    private String restaurantVercelLink;
 
     @Autowired
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter){
