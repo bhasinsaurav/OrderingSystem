@@ -31,9 +31,6 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CustomerAddress> customerAddresses = new HashSet<>();
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Order> orders = new HashSet<>();
-
     @OneToMany(mappedBy = "customer")
     private List<Cart> carts = new ArrayList<>();
 

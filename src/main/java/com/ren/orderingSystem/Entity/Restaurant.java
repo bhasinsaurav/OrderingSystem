@@ -39,7 +39,4 @@ public class Restaurant {
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MenuItem> menuItems = new HashSet<>();
-
-    @OneToMany(mappedBy = "restaurant")
-    private Set<Order> orders= new HashSet<>();
 }
