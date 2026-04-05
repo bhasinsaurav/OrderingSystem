@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 @Entity
 @Data
 @Table(name= "order_items")
-@EqualsAndHashCode(exclude = {"menuItem", "order"})
-@ToString(exclude = {"menuItem", "order"})
+@EqualsAndHashCode(exclude = { "order"})
+@ToString(exclude = {"order"})
 public class OrderItems {
 
     @Id
@@ -28,9 +28,11 @@ public class OrderItems {
     @Column(name = "item_total_price", nullable = false)
     private BigDecimal itemTotalPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "menuitem_id")
-    private MenuItem menuItem;
+    @Column(name = "menu_item_id", nullable = false)
+    private long menuItemId;
+
+    @Column(name = "menuItemName", nullable = false)
+    private String menuItemName;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

@@ -14,8 +14,8 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "order_table")
-@EqualsAndHashCode(exclude = {"customer", "restaurant", "orderItems", "orderStatus"})
-@ToString(exclude = {"customer", "restaurant", "orderItems", "orderStatus"})
+@EqualsAndHashCode(exclude = {"orderItems", "orderStatus"})
+@ToString(exclude = {"orderItems", "orderStatus"})
 public class Order {
 
     @Id
@@ -33,13 +33,11 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(name = "customer_id", nullable = false)
+    private Long customerId;
 
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id")
-    private Restaurant restaurant;
+    @Column(name = "restaurant_id", nullable = false)
+    private Long restaurantId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
