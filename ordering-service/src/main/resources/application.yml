@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/ordering_system
+    url: jdbc:postgresql://localhost:5444/monolith_db
     username: postgres
     password: password
   jpa:
@@ -48,3 +48,10 @@ springdoc:
     url:  ${CLOUDFLARE_URL:http://localhost:8080}/v3/api-docs
 server:
   forward-headers-strategy: framework
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
