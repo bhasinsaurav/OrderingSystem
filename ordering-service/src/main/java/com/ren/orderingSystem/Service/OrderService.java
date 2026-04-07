@@ -165,6 +165,11 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
+        return getOrderResponse(savedOrder);
+
+    }
+
+    private static OrderResponse getOrderResponse(Order savedOrder) {
         List<IncludeOrderItemsInfo> includeOrderItemsInfos = new ArrayList<>();
         for(OrderItems orderItem : savedOrder.getOrderItems()){
             IncludeOrderItemsInfo includeOrderItemsInfo = new IncludeOrderItemsInfo();
@@ -179,10 +184,9 @@ public class OrderService {
         response.setOrderItemsInfo(includeOrderItemsInfos);
         response.setOrderTotal(savedOrder.getTotalAmount());
         response.setOrderStatus(savedOrder.getOrderStatus());
-
         return response;
-
     }
+
     public void updateStatus(UpdateStatusDto updateStatusDto, UUID customerUserId) {
         String orderStatus = updateStatusDto.getOrderStatus();
         Order orderByOrderId = orderRepository.getOrderByOrderId(updateStatusDto.getOrderId());
