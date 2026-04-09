@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  monolith-db:
+    image: postgres:16
+    container_name: monolith-db
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: monolith_db
+    ports:
+      - "5444:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d monolith_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  order-db:
+    image: postgres:16
+    container_name: order-db
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ordering_system
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ordering_system"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  eureka-server:
+    image: springcloud/eureka
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+
+  ordering-syste
+
+networks:
+  default:
+    name: ren-network
