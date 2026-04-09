@@ -25,9 +25,9 @@ public class RestaurantOrderController {
         return new ResponseEntity("Status updated successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/getOrders/{restaurantUserId}")
-    public ResponseEntity<TotalOrdersResponse> getOrders(@PathVariable long restaurantUserId) {
-        TotalOrdersResponse totalOrdersByUserId = orderService.getOrdersByRestaurantId(restaurantUserId);
+    @GetMapping("/getOrders/{userId}")
+    public ResponseEntity<TotalOrdersResponse> getOrders(@PathVariable UUID userId) {
+        TotalOrdersResponse totalOrdersByUserId = orderService.getOrdersByRestaurantId(userId);
         return new ResponseEntity<>(totalOrdersByUserId, HttpStatus.OK);
 
     }

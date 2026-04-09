@@ -134,8 +134,11 @@ public class OrderService {
         );
     }
 
-    public TotalOrdersResponse getOrdersByRestaurantId(long restaurantId) {
+    public TotalOrdersResponse getOrdersByRestaurantId(UUID userId) {
 
+        Optional<User> byId = userRepository.findById(userId);
+        User user = byId.orElseThrow(() -> new RestaurantNotFoundException("no restaurant found for given user Id"));
+        long restaurantId = user.getRestaurant().getRestaurantId();
         return orderFeignClient.getOrdersByRestaurant(restaurantId);
     }
 }

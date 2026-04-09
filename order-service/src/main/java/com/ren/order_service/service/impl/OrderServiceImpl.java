@@ -69,11 +69,11 @@ public class OrderServiceImpl implements OrderService{
 
         String status = updateStatusDto.getOrderStatus();
         switch (status) {
-            case "Accepted" -> order.setOrderStatus(OrderStatus.ACCEPTED);
-            case "Rejected" -> order.setOrderStatus(OrderStatus.REJECTED);
-            case "Prepared" -> order.setOrderStatus(OrderStatus.PREPARED);
-            case "Delivered" -> order.setOrderStatus(OrderStatus.DELIVERED);
-            case "Cancelled" -> order.setOrderStatus(OrderStatus.CANCELED);
+            case "Accepted" , "accepted" -> order.setOrderStatus(OrderStatus.ACCEPTED);
+            case "Rejected" , "rejected" -> order.setOrderStatus(OrderStatus.REJECTED);
+            case "Prepared" , "prepared" -> order.setOrderStatus(OrderStatus.PREPARED);
+            case "Delivered" , "delivered"-> order.setOrderStatus(OrderStatus.DELIVERED);
+            case "Cancelled" , "cancelled" -> order.setOrderStatus(OrderStatus.CANCELED);
         }
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
